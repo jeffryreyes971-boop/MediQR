@@ -15,19 +15,36 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filtros(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf
+                // Desactiva CSRF únicamente en rutas públicas para evitar errores 403 al escanear desde celulares
+                .ignoringRequestMatchers("/emergencia/**", "/consulta/**")
+            )
             .authorizeHttpRequests(a -> a
-                // Públicas: el QR lo abre alguien sin cuenta (médico o rescatista)
-                .requestMatchers("/login", "/registro", "/error",
-                                 "/css/**", "/js/**", "/img/**",
-                                 "/emergencia/**", "/consulta/**").permitAll()
-                .anyRequest().authenticated())
+                // Rutas completamente públicas (No requieren iniciar sesión)
+                .requestMatchers(
+                    "/", 
+                    "/login", 
+                    "/registro", 
+                    "/error",
+                    "/css/**", 
+                    "/js/**", 
+                    "/img/**", 
+                    "/favicon.ico",
+                    "/emergencia/**", 
+                    "/consulta/**",
+                    "/perfiles/*/qr/**"  // <-- OBLIGATORIO: Permite descargar la imagen PNG del QR sin login
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
             .formLogin(f -> f
                 .loginPage("/login")
                 .usernameParameter("correo")
                 .passwordParameter("password")
                 .defaultSuccessUrl("/dashboard", true)
-                .permitAll())
+                .permitAll()
+            )
             .logout(l -> l.logoutSuccessUrl("/login?logout"));
+
         return http.build();
     }
 
