@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Emergencia médica')}"></head>
+<body class="mq-emergencia">
+<main class="container py-3" style="max-width: 560px">
+  <div class="mq-alerta-banner"><i class="bi bi-exclamation-octagon-fill"></i> EMERGENCIA MÉDICA</div>
+
+  <div class="card mq-card mt-3"><div class="card-body">
+    <h1 class="h3 mb-1" th:text="${perfil.nombre}">Nombre</h1>
+    <div class="mq-sangre-grande">
+      <i class="bi bi-droplet-fill"></i>
+      <span th:text="${perfil.tipoSangre} ?: 'Sin dato'">O+</span>
+      <small>Tipo de sangre</small>
+    </div>
+  </div></div>
+
+  <div class="card mq-card mt-3 border-danger"><div class="card-body">
+    <h2 class="h6 text-danger text-uppercase"><i class="bi bi-exclamation-triangle-fill"></i> Alergias</h2>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item px-0" th:each="a : ${alergias}">
+        <strong th:text="${a.sustancia}"></strong>
+        <span class="text-muted" th:if="${a.reaccion}" th:text="'· ' + ${a.reaccion}"></span>
+        <span class="badge text-bg-danger ms-1" th:if="${a.gravedad.name() == 'GRAVE'}">GRAVE</span>
+      </li>
+      <li class="list-group-item px-0 text-muted" th:if="${#lists.isEmpty(alergias)}">Sin alergias registradas</li>
+    </ul>
+  </div></div>
+
+  <div class="card mq-card mt-3"><div class="card-body">
+    <h2 class="h6 text-uppercase text-muted"><i class="bi bi-capsule"></i> Medicamentos críticos</h2>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item px-0" th:each="r : ${criticos}"><strong th:text="${r.medicamento}"></strong> <span th:text="${r.dosis}"></span></li>
+      <li class="list-group-item px-0 text-muted" th:if="${#lists.isEmpty(criticos)}">Ninguno marcado como crítico</li>
+    </ul>
+  </div></div>
+
+  <div class="mt-3 d-grid gap-2 mb-4">
+    <a class="btn btn-danger btn-lg" th:each="c : ${contactos}" th:href="'tel:' + ${c.telefono}">
+      <i class="bi bi-telephone-fill"></i>
+      <span th:text="'Llamar a ' + ${c.nombre} + ' · ' + ${c.telefono}">Llamar</span>
+    </a>
+  </div>
+  <p class="text-center small text-muted">Este acceso fue registrado en MediQR.</p>
+</main>
+</body>
+</html>

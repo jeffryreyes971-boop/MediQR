@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('QR no válido')}"></head>
+<body class="mq-auth">
+<main class="container">
+  <div class="mq-auth-card mx-auto text-center">
+    <div class="display-3 text-danger"><i class="bi bi-qr-code-scan"></i></div>
+    <h1 class="h4 mt-2">Este QR no es válido</h1>
+    <p class="text-muted">Puede que ya se haya usado, que haya vencido o que no exista. Pídele al paciente que genere un código nuevo desde su cuenta de MediQR.</p>
+  </div>
+</main>
+</body>
+</html>

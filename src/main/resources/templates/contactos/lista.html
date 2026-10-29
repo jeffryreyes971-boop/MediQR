@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Contactos')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container py-4">
+  <div th:replace="~{fragments/layout :: tabs(${perfil}, 'contactos')}"></div>
+
+  <div class="card mq-card mb-4"><div class="card-body">
+    <h2 class="h5 mb-1"><i class="bi bi-telephone text-danger"></i> Contactos de emergencia</h2>
+    <p class="small text-muted">Aparecen en el QR de emergencia, con botón para llamar.</p>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item px-0 d-flex align-items-center" th:each="c : ${contactos}">
+        <div class="flex-grow-1">
+          <strong th:text="${c.nombre}"></strong> <span class="text-muted small" th:text="${c.parentesco}"></span><br>
+          <i class="bi bi-telephone"></i> <span th:text="${c.telefono}"></span>
+        </div>
+        <form th:action="@{/perfiles/{p}/contactos/{id}/eliminar(p=${perfil.id},id=${c.id})}" method="post" data-confirm="¿Eliminar este contacto?">
+          <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </li>
+      <li class="list-group-item px-0 text-muted text-center py-4" th:if="${#lists.isEmpty(contactos)}">Agrega al menos un contacto.</li>
+    </ul>
+  </div></div>
+
+  <div class="card mq-card"><div class="card-body">
+    <h2 class="h6 text-uppercase text-muted">Agregar contacto</h2>
+    <form th:action="@{/perfiles/{p}/contactos(p=${perfil.id})}" th:object="${nuevo}" method="post" class="row g-2">
+      <div class="col-md-4"><input class="form-control" th:field="*{nombre}" placeholder="Nombre" required></div>
+      <div class="col-md-3"><input class="form-control" th:field="*{parentesco}" placeholder="Parentesco"></div>
+      <div class="col-md-3"><input class="form-control" th:field="*{telefono}" placeholder="7777-0000" required></div>
+      <div class="col-md-2 d-grid"><button class="btn btn-mq">Guardar</button></div>
+    </form>
+  </div></div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

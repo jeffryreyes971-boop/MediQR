@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Editar perfil')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container py-4" style="max-width: 640px">
+  <a th:href="@{/perfiles/{id}(id=${perfil.id})}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Volver al perfil</a>
+  <h1 class="h4 mt-2 mb-4">Editar perfil</h1>
+  <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+  <form th:action="@{/perfiles/{id}/editar(id=${perfil.id})}" th:object="${perfil}" method="post" class="card mq-card p-4 row g-3 mx-0">
+    <div class="col-12">
+      <label class="form-label">Nombre</label>
+      <input class="form-control" th:field="*{nombre}" required>
+    </div>
+    <div class="col-md-6" th:if="${perfil.parentesco.name() != 'TITULAR'}">
+      <label class="form-label">Parentesco</label>
+      <select class="form-select" th:field="*{parentesco}">
+        <option value="HIJO">Hijo/a</option>
+        <option value="ADULTO_MAYOR">Adulto mayor</option>
+        <option value="OTRO">Otro</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Fecha de nacimiento</label>
+      <input type="date" class="form-control" th:field="*{fechaNacimiento}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Tipo de sangre</label>
+      <select class="form-select" th:field="*{tipoSangre}">
+        <option value="">No sé</option>
+        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+      </select>
+    </div>
+    <div class="col-12 d-flex gap-2">
+      <button class="btn btn-mq">Guardar cambios</button>
+      <a class="btn btn-outline-secondary" th:href="@{/perfiles/{id}(id=${perfil.id})}">Cancelar</a>
+    </div>
+  </form>
+
+  <!-- Zona de peligro: solo para perfiles familiares -->
+  <div class="card mq-card border-danger mt-4" th:if="${perfil.parentesco.name() != 'TITULAR'}"><div class="card-body">
+    <h2 class="h6 text-danger text-uppercase">Eliminar perfil</h2>
+    <p class="small text-muted">Se borrarán también sus alergias, recetas, vacunas, exámenes y documentos. No se puede deshacer.</p>
+    <form th:action="@{/perfiles/{id}/eliminar(id=${perfil.id})}" method="post"
+          data-confirm="¿Eliminar este perfil y TODO su historial? No se puede recuperar.">
+      <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar perfil</button>
+    </form>
+  </div></div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

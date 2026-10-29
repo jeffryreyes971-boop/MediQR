@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nueva receta')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container py-4" style="max-width: 760px">
+  <div th:replace="~{fragments/layout :: tabs(${perfil}, 'recetas')}"></div>
+
+  <h2 class="h5 mb-3">Nueva receta</h2>
+
+  <!-- Alertas de alergia, interacción o laboratorio -->
+  <div th:if="${alertas}" class="alert alert-danger">
+    <div class="fw-bold mb-1"><i class="bi bi-exclamation-octagon-fill"></i> Revisa antes de guardar</div>
+    <ul class="mb-0"><li th:each="a : ${alertas}" th:text="${a}"></li></ul>
+  </div>
+
+  <!-- Dictado por voz -->
+  <div class="mq-voz card mq-card mb-3"><div class="card-body d-flex align-items-center gap-3">
+    <button type="button" id="btnVoz" class="btn btn-outline-primary rounded-pill px-4" th:data-perfil="${perfil.id}">
+      <i class="bi bi-mic-fill"></i> Dictar receta
+    </button>
+    <div>
+      <div id="estadoVoz" class="small text-muted">Di algo como: «Ayer el Dr. García me recetó Amoxicilina de 500 mg cada 8 horas por 7 días».</div>
+    </div>
+  </div></div>
+
+  <form th:action="@{/perfiles/{p}/recetas(p=${perfil.id})}" th:object="${receta}" method="post" class="card mq-card p-4 row g-3 mx-0">
+    <div class="col-12"><label class="form-label">Medicamento</label>
+      <input id="medicamento" class="form-control" th:field="*{medicamento}" th:errorclass="is-invalid">
+      <div class="invalid-feedback" th:errors="*{medicamento}"></div></div>
+    <div class="col-md-6"><label class="form-label">Dosis</label>
+      <input id="dosis" class="form-control" th:field="*{dosis}" placeholder="500 mg"></div>
+    <div class="col-md-3"><label class="form-label">Cada (horas)</label>
+      <input id="frecuenciaHoras" type="number" min="1" class="form-control" th:field="*{frecuenciaHoras}"></div>
+    <div class="col-md-3"><label class="form-label">Por (días)</label>
+      <input id="duracionDias" type="number" min="1" class="form-control" th:field="*{duracionDias}"></div>
+    <div class="col-12"><label class="form-label">Médico</label>
+      <input id="medico" class="form-control" th:field="*{medico}" placeholder="Dr. García"></div>
+    <div class="col-12 form-check ms-2">
+      <input type="checkbox" class="form-check-input" th:field="*{critico}">
+      <label class="form-check-label">Medicamento crítico (mostrar en el QR de emergencia)</label>
+    </div>
+    <div class="col-12 d-flex flex-wrap gap-2">
+      <button class="btn btn-mq">Guardar receta</button>
+      <button th:if="${alertas}" name="confirmar" value="true" class="btn btn-outline-danger">Guardar de todos modos</button>
+      <a class="btn btn-outline-secondary" th:href="@{/perfiles/{p}/recetas(p=${perfil.id})}">Cancelar</a>
+    </div>
+  </form>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/voz.js}"></script>
+</body>
+</html>

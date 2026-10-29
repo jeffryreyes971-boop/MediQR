@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Resumen')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container py-4">
+  <div th:replace="~{fragments/layout :: tabs(${perfil}, 'inicio')}"></div>
+
+  <div class="alert alert-success" th:if="${ok}" th:text="${ok}"></div>
+
+  <!-- Tarjetas con contadores -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="mq-stat"><i class="bi bi-exclamation-triangle text-warning"></i>
+      <strong th:text="${#lists.size(alergias)}">0</strong><span>Alergias</span></div></div>
+    <div class="col-6 col-md-3"><div class="mq-stat"><i class="bi bi-capsule text-primary"></i>
+      <strong th:text="${#lists.size(recetas)}">0</strong><span>Medicamentos activos</span></div></div>
+    <div class="col-6 col-md-3"><div class="mq-stat"><i class="bi bi-shield-plus text-success"></i>
+      <strong th:text="${#lists.size(vacunas)}">0</strong><span>Vacunas</span></div></div>
+    <div class="col-6 col-md-3"><div class="mq-stat"><i class="bi bi-activity text-danger"></i>
+      <strong th:text="${#lists.size(enfermedades)}">0</strong><span>Enfermedades</span></div></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card mq-card mb-4"><div class="card-body">
+        <h2 class="h6 text-uppercase text-muted">Alergias</h2>
+        <p th:if="${#lists.isEmpty(alergias)}" class="text-muted mb-0">Sin alergias registradas.</p>
+        <span th:each="a : ${alergias}" class="badge fs-6 me-1 mb-1"
+              th:classappend="${a.gravedad.name() == 'GRAVE'} ? 'text-bg-danger' : 'text-bg-warning'"
+              th:text="${a.sustancia}">Penicilina</span>
+      </div></div>
+
+      <div class="card mq-card"><div class="card-body">
+        <h2 class="h6 text-uppercase text-muted">Medicamentos activos</h2>
+        <p th:if="${#lists.isEmpty(recetas)}" class="text-muted mb-0">Sin medicamentos activos.</p>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item px-0" th:each="r : ${recetas}">
+            <strong th:text="${r.medicamento}">Metformina</strong>
+            <span class="text-muted" th:text="${r.dosis}">850 mg</span>
+            <span class="small text-muted" th:if="${r.frecuenciaHoras}" th:text="'· cada ' + ${r.frecuenciaHoras} + ' h'"></span>
+          </li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card mq-card"><div class="card-body d-grid gap-2">
+        <h2 class="h6 text-uppercase text-muted">Acciones rápidas</h2>
+        <a class="btn btn-mq" th:href="@{/perfiles/{id}/qr(id=${perfil.id})}"><i class="bi bi-qr-code"></i> Generar QR</a>
+        <a class="btn btn-outline-primary" th:href="@{/perfiles/{id}/recetas/nueva(id=${perfil.id})}"><i class="bi bi-mic"></i> Nueva receta</a>
+        <a class="btn btn-outline-secondary" th:href="@{/perfiles/{id}/resumen(id=${perfil.id})}"><i class="bi bi-stars"></i> Resumen con IA</a>
+        <a class="btn btn-outline-secondary" th:href="@{/perfiles/{id}/recordatorios(id=${perfil.id})}"><i class="bi bi-bell"></i> Recordatorios</a>
+      </div></div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

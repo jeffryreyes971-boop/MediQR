@@ -1,0 +1,78 @@
+MediQR · Proyecto completo para NetBeans (Spring Boot + Thymeleaf + MySQL)
+===========================================================================
+
+LO QUE NECESITAS INSTALADO
+  - JDK 17 o superior (NetBeans debe estar usando ese JDK)
+  - Apache NetBeans 17 o superior (con soporte Maven, viene incluido)
+  - MySQL 8 y MySQL Workbench
+  - Conexión a internet la primera vez (Maven descarga las librerías)
+
+PASO 1 · CREAR LA BASE DE DATOS
+  1. Abre MySQL Workbench y conéctate.
+  2. Abre y ejecuta  db/1_schema.sql  (rayo amarillo). Crea mediqr_db y sus 16 tablas.
+  3. Abre y ejecuta  db/2_datos_ejemplo.sql  (medicamentos e interacciones de prueba).
+  Ejecútalos UNA sola vez, en ese orden.
+
+PASO 2 · ABRIR EL PROYECTO EN NETBEANS
+  1. Descomprime este zip.
+  2. NetBeans: Archivo (File) > Abrir proyecto (Open Project) > elige la carpeta MediQR
+     (la que tiene el icono de Maven).
+  3. Espera a que termine de descargar dependencias (barra de progreso abajo a la derecha).
+
+PASO 3 · CONFIGURAR LA CONTRASEÑA DE MYSQL
+  Abre src/main/resources/application.properties y cambia:
+      spring.datasource.password=TU_CLAVE_DE_MYSQL
+  por tu contraseña real de MySQL (si tu usuario no es root, cambia también el username).
+
+PASO 4 · EJECUTAR
+  Opción A: en Proyectos abre  Source Packages > com.mediqr > MediqrApplication.java,
+            clic derecho > Run File (o Shift+F6).
+  Opción B: clic derecho al proyecto > Run Maven > Goals... > escribe  spring-boot:run
+  Cuando veas "Started MediqrApplication", abre:  http://localhost:8080
+  Crea tu cuenta en "Regístrate" y empieza.
+
+PROBAR EL QR DESDE EL CELULAR
+  En application.properties cambia  mediqr.base-url  por la IP de tu PC
+  (ejemplo  http://192.168.1.50:8080 ), reinicia, abre esa misma dirección en el
+  navegador de tu PC y permite el puerto 8080 en el firewall de Windows.
+
+IA (OPCIONAL)
+  Sin clave, todo funciona menos el "Resumen con IA" y el dictado por voz.
+  Para activarlos crea la variable de entorno ANTHROPIC_API_KEY con tu clave de
+  console.anthropic.com y reinicia NetBeans.
+
+SI ALGO FALLA
+  - "Access denied for user"            -> contraseña de MySQL mal en application.properties
+  - "Unknown database 'mediqr_db'"      -> falta ejecutar db/1_schema.sql
+  - "Port 8080 was already in use"      -> cierra lo que use el 8080 o agrega
+                                           server.port=8081 en application.properties
+  - Errores de "release version 17"     -> NetBeans usa un JDK viejo: Propiedades del proyecto >
+                                           Build > Compile, y Herramientas > Plataformas Java
+  - Líneas rojas pero compila bien      -> clic derecho al proyecto > Clean and Build
+  - "Table ... doesn't exist"           -> el script SQL no se ejecutó completo
+
+LO QUE PUEDES HACER EN LA APLICACIÓN
+  - Crear cuenta e iniciar sesión (contraseñas cifradas con BCrypt)
+  - Varios perfiles por cuenta (tú, hijos, adulto mayor): crear, editar y eliminar
+    (el perfil del titular no se puede eliminar)
+  - Alergias, recetas, vacunas, enfermedades, contactos de emergencia
+  - Exámenes y resultados de laboratorio (crear y eliminar)
+  - Documentos PDF/imagen guardados cifrados (subir, ver y eliminar)
+  - Recordatorios de vacunas, controles y medicamentos (se envían por correo)
+  - QR de emergencia (permanente) y QR de consulta (un solo uso, vence en 10 min)
+  - Historial de quién abrió tus QR
+  - Alertas al guardar una receta: alergias, interacciones y laboratorio
+  - Resumen con IA y dictado de receta por voz (opcional, necesitan ANTHROPIC_API_KEY)
+
+RECORDATORIOS POR CORREO (OPCIONAL)
+  Crea las variables de entorno MAIL_USER y MAIL_PASSWORD (para Gmail usa una
+  "contraseña de aplicación") y reinicia NetBeans. Sin ellas, los recordatorios
+  se guardan igual pero no se envía el correo.
+
+ESTRUCTURA
+  db/                         scripts de MySQL
+  src/main/java/com/mediqr/   model, repository, service, controller, dto, security
+  src/main/resources/
+      application.properties  configuración
+      templates/              pantallas HTML (Thymeleaf)
+      static/                 CSS, JavaScript e imágenes

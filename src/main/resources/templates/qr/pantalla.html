@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Códigos QR')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container py-4">
+  <div th:replace="~{fragments/layout :: tabs(${perfil}, 'qr')}"></div>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card mq-card h-100 text-center"><div class="card-body">
+        <span class="badge text-bg-danger mb-2">Permanente</span>
+        <h2 class="h5 text-danger"><i class="bi bi-heart-pulse"></i> QR de emergencia</h2>
+        <p class="small text-muted">Muestra solo lo vital. Imprímelo, pégalo en tu billetera o úsalo como fondo de pantalla.</p>
+        <img class="mq-qr" th:src="@{/perfiles/{id}/qr/emergencia.png(id=${perfil.id})}" alt="QR de emergencia">
+        <div class="mt-3"><button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button></div>
+      </div></div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mq-card h-100 text-center"><div class="card-body">
+        <span class="badge text-bg-primary mb-2">Un solo uso</span>
+        <h2 class="h5 text-primary"><i class="bi bi-person-badge"></i> QR de consulta</h2>
+        <p class="small text-muted">Para tu médico. Da el historial completo y vence pronto.</p>
+        <img class="mq-qr" th:src="@{/perfiles/{id}/qr/consulta/{c}.png(id=${perfil.id},c=${codigoConsulta})}" alt="QR de consulta">
+        <div class="mq-cuenta mt-3">Vence en <strong id="cuenta" th:data-segundos="${segundos}">--:--</strong></div>
+        <a class="btn btn-mq btn-sm mt-2" th:href="@{/perfiles/{id}/qr(id=${perfil.id})}"><i class="bi bi-arrow-repeat"></i> Generar uno nuevo</a>
+      </div></div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+  // Cuenta regresiva del QR de consulta
+  (function () {
+    const el = document.getElementById('cuenta');
+    let s = parseInt(el.dataset.segundos, 10);
+    const t = setInterval(function () {
+      if (s <= 0) { clearInterval(t); el.textContent = 'VENCIDO'; el.classList.add('text-danger'); return; }
+      el.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+      s--;
+    }, 1000);
+  })();
+</script>
+</body>
+</html>

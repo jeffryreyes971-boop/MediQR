@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Historial clínico')}"></head>
+<body class="mq-consulta">
+<main class="container py-4" style="max-width: 860px">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <div class="text-uppercase small text-muted">Historial clínico · MediQR</div>
+      <h1 class="h3 mb-1" th:text="${perfil.nombre}">Nombre</h1>
+      <span class="badge mq-sangre" th:if="${perfil.tipoSangre}" th:text="'Sangre ' + ${perfil.tipoSangre}">O+</span>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+  </div>
+
+  <div class="alert alert-warning small"><i class="bi bi-info-circle"></i> Este enlace es de un solo uso. Si recargas la página, ya no se podrá abrir.</div>
+
+  <div class="card mq-card mb-3 border-danger"><div class="card-body">
+    <h2 class="h6 text-danger text-uppercase">Alergias</h2>
+    <p class="text-muted mb-0" th:if="${#lists.isEmpty(alergias)}">Sin alergias registradas.</p>
+    <span th:each="a : ${alergias}" class="badge fs-6 me-1 mb-1" th:classappend="${a.gravedad.name() == 'GRAVE'} ? 'text-bg-danger' : 'text-bg-warning'"
+          th:text="${a.sustancia + (a.reaccion != null ? ' (' + a.reaccion + ')' : '')}"></span>
+  </div></div>
+
+  <div class="card mq-card mb-3"><div class="card-body">
+    <h2 class="h6 text-uppercase text-muted">Medicamentos activos</h2>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Médico</th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${recetas}"><td class="fw-semibold" th:text="${r.medicamento}"></td><td th:text="${r.dosis}"></td>
+          <td th:text="${r.frecuenciaHoras != null} ? 'Cada ' + ${r.frecuenciaHoras} + ' h' : '—'"></td><td th:text="${r.medico}"></td></tr>
+        <tr th:if="${#lists.isEmpty(recetas)}"><td colspan="4" class="text-muted">Sin medicamentos activos.</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="row g-3">
+    <div class="col-md-6"><div class="card mq-card h-100"><div class="card-body">
+      <h2 class="h6 text-uppercase text-muted">Enfermedades</h2>
+      <ul class="mb-0"><li th:each="e : ${enfermedades}" th:text="${e.nombre + (e.cronica ? ' (crónica)' : '')}"></li></ul>
+      <p class="text-muted mb-0" th:if="${#lists.isEmpty(enfermedades)}">Ninguna registrada.</p>
+    </div></div></div>
+    <div class="col-md-6"><div class="card mq-card h-100"><div class="card-body">
+      <h2 class="h6 text-uppercase text-muted">Vacunas</h2>
+      <ul class="mb-0"><li th:each="v : ${vacunas}" th:text="${v.nombre + ' · ' + #temporals.format(v.fechaAplicacion, 'dd/MM/yyyy')}"></li></ul>
+      <p class="text-muted mb-0" th:if="${#lists.isEmpty(vacunas)}">Ninguna registrada.</p>
+    </div></div></div>
+  </div>
+  <p class="text-center small text-muted mt-4">Acceso registrado en MediQR. La información fue compartida por el paciente.</p>
+</main>
+</body>
+</html>

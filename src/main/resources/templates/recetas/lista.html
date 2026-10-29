@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Recetas')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container py-4">
+  <div th:replace="~{fragments/layout :: tabs(${perfil}, 'recetas')}"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 mb-0"><i class="bi bi-capsule text-primary"></i> Recetas y medicamentos</h2>
+    <a class="btn btn-mq" th:href="@{/perfiles/{id}/recetas/nueva(id=${perfil.id})}"><i class="bi bi-plus-lg"></i> Nueva receta</a>
+  </div>
+
+  <div class="card mq-card"><div class="card-body">
+    <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Médico</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${recetas}" th:classappend="${!r.activa} ? 'text-muted'">
+          <td class="fw-semibold">
+            <span th:text="${r.medicamento}"></span>
+            <span class="badge text-bg-danger ms-1" th:if="${r.critico}">Crítico</span>
+          </td>
+          <td th:text="${r.dosis}"></td>
+          <td><span th:if="${r.frecuenciaHoras}" th:text="'Cada ' + ${r.frecuenciaHoras} + ' h'"></span>
+              <span th:if="${r.duracionDias}" th:text="' por ' + ${r.duracionDias} + ' días'"></span></td>
+          <td th:text="${r.medico}"></td>
+          <td th:text="${#temporals.format(r.fechaReceta, 'dd/MM/yyyy')}"></td>
+          <td><span class="badge" th:classappend="${r.activa} ? 'text-bg-success' : 'text-bg-secondary'"
+                    th:text="${r.activa} ? 'Activa' : 'Finalizada'"></span></td>
+          <td class="text-end">
+            <form th:if="${r.activa}" th:action="@{/perfiles/{p}/recetas/{id}/finalizar(p=${perfil.id},id=${r.id})}" method="post"
+                  data-confirm="¿Marcar esta receta como finalizada?">
+              <button class="btn btn-sm btn-outline-secondary" title="Finalizar"><i class="bi bi-check2-circle"></i></button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(recetas)}"><td colspan="7" class="text-muted text-center py-4">Aún no hay recetas registradas.</td></tr>
+      </tbody>
+    </table></div>
+  </div></div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

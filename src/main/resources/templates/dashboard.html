@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Mis perfiles')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<header class="mq-hero">
+  <div class="container">
+    <h1 class="h3 fw-bold mb-1">Hola, <span sec:authentication="name"></span></h1>
+    <p class="mb-0 opacity-75">Elige un perfil para ver o actualizar su historial médico.</p>
+  </div>
+</header>
+
+<main class="container py-4">
+  <div class="alert alert-success" th:if="${ok}" th:text="${ok}"></div>
+  <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+  <div class="row g-4">
+
+    <div class="col-md-6 col-lg-4" th:each="p : ${perfiles}">
+      <div class="card mq-card h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="mq-avatar" th:text="${#strings.toUpperCase(#strings.substring(p.nombre,0,1))}">A</div>
+            <div>
+              <h2 class="h5 mb-0" th:text="${p.nombre}">Nombre</h2>
+              <span class="badge text-bg-light" th:text="${p.parentesco}">TITULAR</span>
+            </div>
+          </div>
+          <p class="small text-muted mb-3">
+            <i class="bi bi-droplet-fill text-danger"></i> Sangre:
+            <strong th:text="${p.tipoSangre} ?: 'sin registrar'">O+</strong>
+          </p>
+          <div class="mt-auto d-grid gap-2">
+            <a class="btn btn-mq" th:href="@{/perfiles/{id}(id=${p.id})}"><i class="bi bi-folder2-open"></i> Abrir historial</a>
+            <div class="d-flex gap-2">
+              <a class="btn btn-outline-secondary btn-sm flex-fill" th:href="@{/perfiles/{id}/qr(id=${p.id})}"><i class="bi bi-qr-code"></i> QR</a>
+              <a class="btn btn-outline-secondary btn-sm flex-fill" th:href="@{/perfiles/{id}/resumen(id=${p.id})}"><i class="bi bi-stars"></i> Resumen IA</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a th:href="@{/perfiles/nuevo}" class="mq-card-add text-decoration-none">
+        <i class="bi bi-plus-circle display-5"></i>
+        <span class="fw-semibold">Agregar perfil</span>
+        <span class="small text-muted">Hijo, adulto mayor u otro familiar</span>
+      </a>
+    </div>
+
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
