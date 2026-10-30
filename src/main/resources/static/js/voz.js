@@ -70,24 +70,31 @@
     if (estado) estado.textContent = 'Interpretando «' + textoFinal + '» con IA...';
 
     try {
+      // 1. Intenta leer meta tags de CSRF
       var csrfMeta = document.querySelector('meta[name="_csrf"]');
       var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
       var headers = { 'Content-Type': 'application/json' };
-      if (csrfMeta && headerMeta) {
+
+      // 2. Si existen metatags se envian, sino busca el token dentro del formulario de Thymeleaf
+      if (csrfMeta && headerMeta && csrfMeta.content) {
         headers[headerMeta.content] = csrfMeta.content;
+      } else {
+        var inputCsrf = document.querySelector('input[name="_csrf"]');
+        if (inputCsrf) {
+          headers['X-CSRF-TOKEN'] = inputCsrf.value;
+        }
       }
 
       var resp = await fetch('/api/perfiles/' + btn.dataset.perfil + '/voz', {
         method: 'POST',
         headers: headers,
+        credentials: 'same-origin',
         body: JSON.stringify({ texto: textoFinal })
       });
 
       if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
-
-      // Muestra en la consola de Chrome lo que envio el servidor
-      console.log('Respuesta del servidor Java:', datos);
 
       var receta = datos.receta || datos;
 
@@ -105,7 +112,6 @@
           : 'Revisa los datos y pulsa «Guardar receta».';
       }
     } catch (err) {
-      console.error('Error procesando receta:', err);
       if (estado) estado.textContent = 'No se pudo interpretar. Escribe los datos a mano.';
     }
   };
