@@ -1,5 +1,4 @@
 // static/js/voz.js
-// Dictado de receta: voz -> texto (navegador) -> Java + IA -> campos del formulario
 (function () {
   var btn = document.getElementById('btnVoz');
   var estado = document.getElementById('estadoVoz');
@@ -14,7 +13,7 @@
 
   var rec = new Reconocimiento();
   rec.lang = 'es-SV';
-  rec.interimResults = true; // Permite ver las palabras en tiempo real mientras hablas
+  rec.interimResults = true;
   rec.continuous = false;
 
   var escuchando = false;
@@ -34,13 +33,12 @@
       btn.textContent = 'Detener dictado';
       if (estado) estado.textContent = 'Escuchando... habla ahora.';
     } catch (err) {
-      if (estado) estado.textContent = 'Error al activar el micrófono. Intenta de nuevo.';
+      if (estado) estado.textContent = 'Error al activar el micrófono.';
     }
   });
 
   rec.onresult = function (e) {
     var textoProvisorio = '';
-
     for (var i = e.resultIndex; i < e.results.length; i++) {
       var transcripcion = e.results[i][0].transcript;
       if (e.results[i].isFinal) {
@@ -49,7 +47,6 @@
         textoProvisorio += transcripcion;
       }
     }
-
     var textoActual = textoFinal || textoProvisorio;
     if (estado && textoActual) {
       estado.textContent = 'Entendí: «' + textoActual + '»...';
@@ -60,15 +57,7 @@
     escuchando = false;
     btn.classList.remove('escuchando');
     btn.textContent = 'Dictar receta';
-
-    if (!estado) return;
-    if (e.error === 'not-allowed') {
-      estado.textContent = 'Permiso denegado. Permite el uso del micrófono en tu navegador.';
-    } else if (e.error === 'no-speech') {
-      estado.textContent = 'No se detectó voz. Intenta de nuevo hablando más cerca del micrófono.';
-    } else {
-      estado.textContent = 'Error al escuchar (' + e.error + '). Intenta de nuevo.';
-    }
+    if (estado) estado.textContent = 'Error al escuchar (' + e.error + '). Intenta de nuevo.';
   };
 
   rec.onend = async function () {
@@ -76,37 +65,43 @@
     btn.classList.remove('escuchando');
     btn.textContent = 'Dictar receta';
 
-    if (!textoFinal.trim()) {
-      return; // Si no hubo palabras detectadas, finaliza sin llamar al servidor
-    }
+    if (!textoFinal.trim()) return;
 
     if (estado) estado.textContent = 'Interpretando «' + textoFinal + '» con IA...';
 
     try {
       var csrfMeta = document.querySelector('meta[name="_csrf"]');
       var headerMeta = document.querySelector('meta[name="_csrf_header"]');
-      
       var headers = { 'Content-Type': 'application/json' };
       if (csrfMeta && headerMeta) {
         headers[headerMeta.content] = csrfMeta.content;
       }
 
       var resp = await fetch('/api/perfiles/' + btn.dataset.perfil + '/voz', {
-        method: 'POST', 
-        headers: headers, 
+        method: 'POST',
+        headers: headers,
         body: JSON.stringify({ texto: textoFinal })
       });
 
-      if (!resp.ok) throw new Error('Error ' + resp.status);
+      if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
 
-      ['medicamento', 'dosis', 'frecuenciaHoras', 'duracionDias', 'medico'].forEach(function (campo) {
-        var el = document.getElementById(campo);
-        if (el && datos.receta) {
-          var v = datos.receta[campo];
-          el.value = (v === null || v === undefined) ? '' : v;
-        }
-      });
+      // Extrae la receta ya sea que venga envuelta en datos.receta o directa
+      var receta = datos.receta || datos;
+
+      if (receta) {
+        var med = receta.medicamento || receta.medicamentoNombre || '';
+        var dos = receta.dosis || '';
+        var freq = receta.frecuenciaHoras || receta.frecuencia_horas || receta.frecuencia || '';
+        var dur = receta.duracionDias || receta.duracion_dias || receta.duracion || '';
+        var medi = receta.medico || receta.doctor || '';
+
+        if (document.getElementById('medicamento')) document.getElementById('medicamento').value = med;
+        if (document.getElementById('dosis')) document.getElementById('dosis').value = dos;
+        if (document.getElementById('frecuenciaHoras')) document.getElementById('frecuenciaHoras').value = freq;
+        if (document.getElementById('duracionDias')) document.getElementById('duracionDias').value = dur;
+        if (document.getElementById('medico')) document.getElementById('medico').value = medi;
+      }
 
       if (estado) {
         estado.textContent = (datos.alertas && datos.alertas.length)
