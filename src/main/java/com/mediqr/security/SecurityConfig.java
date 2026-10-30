@@ -12,29 +12,30 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-   @Bean
-       SecurityFilterChain filtros(HttpSecurity http) throws Exception {
-      http
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/emergencia/**", "/consulta/**"))
-        .authorizeHttpRequests(a -> a
-            .requestMatchers(
-                "/", "/login", "/registro", "/error",
-                "/css/**", "/js/**", "/img/**", "/favicon.ico",
-                "/emergencia/**", "/consulta/**",
-                "/perfiles/*/qr/**"
-            ).permitAll()
-            .anyRequest().authenticated()
-        )
-        .formLogin(f -> f
-            .loginPage("/login")
-            .usernameParameter("correo")
-            .passwordParameter("password")
-            .defaultSuccessUrl("/dashboard", true)
-            .permitAll()
-        )
-        .logout(l -> l.logoutSuccessUrl("/login?logout"));
+    @Bean
+    SecurityFilterChain filtros(HttpSecurity http) throws Exception {
+        http
+            // Se agrega /api/** para evitar bloqueos 403 en peticiones asincronas de voz/IA
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/emergencia/**", "/consulta/**", "/api/**"))
+            .authorizeHttpRequests(a -> a
+                .requestMatchers(
+                    "/", "/login", "/registro", "/error",
+                    "/css/**", "/js/**", "/img/**", "/favicon.ico",
+                    "/emergencia/**", "/consulta/**",
+                    "/perfiles/*/qr/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(f -> f
+                .loginPage("/login")
+                .usernameParameter("correo")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/dashboard", true)
+                .permitAll()
+            )
+            .logout(l -> l.logoutSuccessUrl("/login?logout"));
 
-    return http.build();
+        return http.build();
     }
 
     @Bean
