@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Nueva receta')}"></head>
+<head th:replace="~{/fragments/layout :: head('Nueva receta')}"></head>
 <body>
-<nav th:replace="~{fragments/layout :: nav}"></nav>
+<nav th:replace="~{/fragments/layout :: nav}"></nav>
 <main class="container py-4" style="max-width: 760px">
-  <div th:replace="~{fragments/layout :: tabs(${perfil}, 'recetas')}"></div>
+  <div th:replace="~{/fragments/layout :: tabs(${perfil}, 'recetas')}"></div>
 
   <h2 class="h5 mb-3">Nueva receta</h2>
 
@@ -47,7 +47,7 @@
     </div>
   </form>
 </main>
-<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<th:block th:replace="~{/fragments/layout :: scripts}"></th:block>
 <script th:src="@{/js/voz.js}"></script>
 </body>
 </html>
