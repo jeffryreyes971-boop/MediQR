@@ -37,7 +37,6 @@ public class VozService {
 
     public VozService(IaService ia, ObjectMapper mapper) {
         this.ia = ia;
-        // Configuración tolerante para evitar fallos en la deserialización de Jackson
         this.mapper = mapper.copy()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
@@ -52,9 +51,8 @@ public class VozService {
                 return new RecetaDto(null, null, null, null, null);
             }
 
-            // Extraer únicamente el bloque JSON {...} omitiendo marcas de markdown o texto
             String json = extraerJson(respuestaRaw);
-            log.info("JSON limpio para parsear: {}", json);
+            log.info("JSON extraído: {}", json);
 
             if (json.isBlank() || json.equals("{}")) {
                 return new RecetaDto(null, null, null, null, null);
@@ -63,7 +61,7 @@ public class VozService {
             return mapper.readValue(json, RecetaDto.class);
 
         } catch (Exception e) {
-            log.error("Fallo al interpretar la receta con IA: {}", e.getMessage(), e);
+            log.error("Fallo al interpretar la receta: {}", e.getMessage());
             return new RecetaDto(null, null, null, null, null);
         }
     }
