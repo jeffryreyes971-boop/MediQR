@@ -48,7 +48,12 @@ public class QrController {
     @ResponseBody
     public byte[] pngEmergencia(@PathVariable Long perfilId, Principal pr) throws Exception {
         Perfil p = perfilService.obtenerSiEsDueno(perfilId, pr.getName());
-        return qrImage.png(baseUrl + "/emergencia/" + p.getCodigoEmergencia(), 300);
+        
+        // Limpieza defensiva de corchetes, paréntesis o diagonales dobles
+        String urlLimpia = baseUrl.replaceAll("\\[|\\]|\\(|\\)", "").trim().replaceAll("/+$", "");
+        String urlFinal = urlLimpia + "/emergencia/" + p.getCodigoEmergencia();
+        
+        return qrImage.png(urlFinal, 300);
     }
 
     @GetMapping(value = "/consulta/{codigo}.png", produces = MediaType.IMAGE_PNG_VALUE)
@@ -56,6 +61,11 @@ public class QrController {
     public byte[] pngConsulta(@PathVariable Long perfilId, @PathVariable String codigo,
                               Principal pr) throws Exception {
         perfilService.obtenerSiEsDueno(perfilId, pr.getName());
-        return qrImage.png(baseUrl + "/consulta/" + codigo, 300);
+        
+        // Limpieza defensiva de corchetes, paréntesis o diagonales dobles
+        String urlLimpia = baseUrl.replaceAll("\\[|\\]|\\(|\\)", "").trim().replaceAll("/+$", "");
+        String urlFinal = urlLimpia + "/consulta/" + codigo;
+        
+        return qrImage.png(urlFinal, 300);
     }
 }
