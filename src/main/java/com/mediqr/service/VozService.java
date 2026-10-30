@@ -8,10 +8,16 @@ import org.springframework.stereotype.Service;
 public class VozService {
 
     private static final String INSTRUCCIONES = """
-        Extrae los datos de una receta médica de la frase del usuario.
-        Responde SOLO con un objeto JSON, sin texto adicional ni comillas invertidas,
-        con estas claves: medicamento, dosis, frecuenciaHoras (entero),
-        duracionDias (entero), medico. Usa null si un dato no aparece en la frase.
+        Extrae los datos de una receta médica de la frase entregada por el usuario.
+        Responde ÚNICAMENTE con un objeto JSON válido, sin texto explicativo adicional ni comillas invertidas.
+        Las claves del JSON deben ser exactamente:
+        - medicamento (String)
+        - dosis (String)
+        - frecuenciaHoras (Integer)
+        - duracionDias (Integer)
+        - medico (String)
+        
+        Usa null si un dato no aparece en la frase.
         """;
 
     private final IaService ia;
@@ -22,9 +28,19 @@ public class VozService {
         this.mapper = mapper;
     }
 
-    public RecetaDto interpretar(String texto) throws Exception {
-        String json = ia.preguntar(INSTRUCCIONES, texto)
-                        .replaceAll("```json|```", "").trim();
-        return mapper.readValue(json, RecetaDto.class);   // valida que sea JSON correcto
+    public RecetaDto interpretar(String texto) {
+        try {
+            String respuestaIa = ia.preguntar(INSTRUCCIONES, texto);
+            
+            // Limpieza robusta de etiquetas markdown o comillas invertidas
+            String jsonLimpio = respuestaIa.replaceAll("```json", "")
+                                           .replaceAll("```", "")
+                                           .trim();
+
+            return mapper.readValue(jsonLimpio, RecetaDto.class);
+        } catch (Exception e) {
+            // Si la IA no responde un JSON perfecto o falla, devuelve un objeto seguro en lugar de lanzar excepción
+            return new RecetaDto(null, null, null, null, null);
+        }
     }
 }
