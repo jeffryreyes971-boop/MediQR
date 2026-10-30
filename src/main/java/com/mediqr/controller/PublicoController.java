@@ -40,11 +40,11 @@ public class PublicoController {
     }
 
     /** QR de emergencia: SOLO lo vital. */
-    @GetMapping("/emergencia/{codigo}")
-    public String emergencia(@PathVariable String codigo, HttpServletRequest req, Model model) {
-        Optional<Perfil> op = perfiles.findByCodigoEmergencia(codigo);
-        if (op.isEmpty()) return "qr/invalido";
-        Perfil p = op.get();
+  @GetMapping("/emergencia/{codigo}")
+@org.springframework.web.bind.annotation.ResponseBody
+public String emergencia(@PathVariable String codigo) {
+    return "OK: La ruta de emergencia es publica y el codigo recibido es: " + codigo;
+}
 
         auditoria.registrar(p, "EMERGENCIA", req);
         model.addAttribute("perfil", p);
