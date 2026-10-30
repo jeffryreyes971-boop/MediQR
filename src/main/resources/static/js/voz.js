@@ -86,21 +86,17 @@
       if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
 
-      // Extrae la receta ya sea que venga envuelta en datos.receta o directa
+      // Muestra en la consola de Chrome lo que envio el servidor
+      console.log('Respuesta del servidor Java:', datos);
+
       var receta = datos.receta || datos;
 
       if (receta) {
-        var med = receta.medicamento || receta.medicamentoNombre || '';
-        var dos = receta.dosis || '';
-        var freq = receta.frecuenciaHoras || receta.frecuencia_horas || receta.frecuencia || '';
-        var dur = receta.duracionDias || receta.duracion_dias || receta.duracion || '';
-        var medi = receta.medico || receta.doctor || '';
-
-        if (document.getElementById('medicamento')) document.getElementById('medicamento').value = med;
-        if (document.getElementById('dosis')) document.getElementById('dosis').value = dos;
-        if (document.getElementById('frecuenciaHoras')) document.getElementById('frecuenciaHoras').value = freq;
-        if (document.getElementById('duracionDias')) document.getElementById('duracionDias').value = dur;
-        if (document.getElementById('medico')) document.getElementById('medico').value = medi;
+        if (receta.medicamento) document.getElementById('medicamento').value = receta.medicamento;
+        if (receta.dosis) document.getElementById('dosis').value = receta.dosis;
+        if (receta.frecuenciaHoras) document.getElementById('frecuenciaHoras').value = receta.frecuenciaHoras;
+        if (receta.duracionDias) document.getElementById('duracionDias').value = receta.duracionDias;
+        if (receta.medico) document.getElementById('medico').value = receta.medico;
       }
 
       if (estado) {
@@ -109,6 +105,7 @@
           : 'Revisa los datos y pulsa «Guardar receta».';
       }
     } catch (err) {
+      console.error('Error procesando receta:', err);
       if (estado) estado.textContent = 'No se pudo interpretar. Escribe los datos a mano.';
     }
   };
