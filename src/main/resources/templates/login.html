@@ -2,35 +2,60 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Iniciar sesión')}"></head>
 <body class="mq-auth">
-<main class="container">
-  <div class="mq-auth-card mx-auto">
+
+<main class="container d-flex justify-content-center align-items-center min-vh-100 py-4">
+  <div class="mq-auth-card">
+    
+    <!-- Encabezado con Logo centrado -->
     <div class="text-center mb-4">
-      <div class="mq-logo"><i class="bi bi-heart-pulse-fill"></i></div>
-      <h1 class="h3 fw-bold mb-0">Medi<span class="text-info">QR</span></h1>
-      <p class="text-muted small">Tu historial médico, siempre contigo</p>
+      <div class="mq-logo mb-2">
+        <img th:src="@{/img/logo-mediqr.png}" alt="Logo MediQR">
+      </div>
+      <p class="text-muted small mb-0">Tus datos médicos, siempre a la mano</p>
     </div>
 
-    <div class="alert alert-danger" th:if="${param.error}">Correo o contraseña incorrectos.</div>
-    <div class="alert alert-success" th:if="${param.registrado}">Cuenta creada. Ya puedes iniciar sesión.</div>
-    <div class="alert alert-info" th:if="${param.logout}">Cerraste sesión correctamente.</div>
+    <!-- Alertas de estado (Spring Security) -->
+    <div class="alert alert-danger py-2 small" th:if="${param.error}">Correo o contraseña incorrectos.</div>
+    <div class="alert alert-success py-2 small" th:if="${param.registrado}">Cuenta creada. Ya puedes iniciar sesión.</div>
+    <div class="alert alert-info py-2 small" th:if="${param.logout}">Cerraste sesión correctamente.</div>
 
-    <!-- Spring Security espera los campos "correo" y "password" -->
+    <!-- Formulario de autenticación -->
     <form th:action="@{/login}" method="post">
-      <label class="form-label">Correo</label>
-      <div class="input-group mb-3">
-        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-        <input name="correo" type="email" class="form-control" placeholder="tucorreo@ejemplo.com" required autofocus>
+      
+      <!-- Campo Correo -->
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">Correo electrónico</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-envelope text-muted"></i>
+          </span>
+          <input name="correo" type="email" class="form-control bg-light border-start-0" placeholder="tucorreo@ejemplo.com" required autofocus>
+        </div>
       </div>
-      <label class="form-label">Contraseña</label>
-      <div class="input-group mb-4">
-        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-        <input name="password" type="password" class="form-control" required>
+      
+      <!-- Campo Contraseña -->
+      <div class="mb-4">
+        <label class="form-label small fw-semibold">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-lock text-muted"></i>
+          </span>
+          <input name="password" type="password" class="form-control bg-light border-start-0" placeholder="••••••••" required>
+        </div>
       </div>
-      <button class="btn btn-mq w-100 py-2">Entrar</button>
+      
+      <!-- Botón de Inicio de Sesión -->
+      <button type="submit" class="btn btn-mq w-100 py-2.5 rounded-3 fw-semibold">Entrar</button>
     </form>
-    <p class="text-center small mt-4 mb-0">¿No tienes cuenta? <a th:href="@{/registro}">Regístrate</a></p>
+    
+    <!-- Enlace a Registro -->
+    <p class="text-center small mt-4 mb-0">
+      ¿No tienes cuenta? <a th:href="@{/registro}" class="fw-bold text-decoration-none">Regístrate</a>
+    </p>
+
   </div>
 </main>
+
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>
 </html>
