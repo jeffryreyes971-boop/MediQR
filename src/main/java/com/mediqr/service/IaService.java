@@ -25,7 +25,7 @@ public class IaService {
             return "{}";
         }
 
-        // URL actualizada con el modelo estándar v1beta
+        // Endpoint corregido para Gemini v1beta
         String url = "/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
@@ -57,11 +57,11 @@ public class IaService {
             Map<?, ?> part = (Map<?, ?>) parts.get(0);
 
             String textoResultado = (String) part.get("text");
-            log.info("Respuesta directa de Gemini: {}", textoResultado);
+            log.info("Respuesta de Gemini: {}", textoResultado);
             return textoResultado;
 
         } catch (Exception e) {
-            log.error("Error al comunicarse con la API de Gemini: {}", e.getMessage(), e);
+            log.error("Error al comunicarse con Gemini: {}", e.getMessage());
             return "{}";
         }
     }
