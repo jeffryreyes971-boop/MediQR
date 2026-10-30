@@ -94,20 +94,25 @@
       if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
 
-      var receta = datos.receta || datos.datos || datos;
+      // Muestra en la consola de Developer Tools el JSON exacto retornado
+      console.log('Respuesta recibida del servidor:', datos);
 
-      if (receta) {
-        var med = receta.medicamento || receta.nombre || receta.nombreMedicamento;
-        var dos = receta.dosis || receta.cantidad;
-        var frec = receta.frecuenciaHoras || receta.frecuencia_horas || receta.frecuencia;
-        var dur = receta.duracionDias || receta.duracion_dias || receta.duracion;
-        var medi = receta.medico || receta.doctor || receta.nombreMedico;
+      // Extrae la receta sin importar si viene en datos.receta, datos.datos o directamente en datos
+      var r = datos.receta || datos.datos || datos;
 
-        if (med) document.getElementById('medicamento').value = med;
-        if (dos) document.getElementById('dosis').value = dos;
-        if (frec) document.getElementById('frecuenciaHoras').value = frec;
-        if (dur) document.getElementById('duracionDias').value = dur;
-        if (medi) document.getElementById('medico').value = medi;
+      if (r) {
+        // Asignación con búsqueda amplia de propiedades
+        var inputMed = document.getElementById('medicamento');
+        var inputDos = document.getElementById('dosis');
+        var inputFrec = document.getElementById('frecuenciaHoras');
+        var inputDur = document.getElementById('duracionDias');
+        var inputDoc = document.getElementById('medico');
+
+        if (inputMed) inputMed.value = r.medicamento || r.nombre || r.nombreMedicamento || '';
+        if (inputDos) inputDos.value = r.dosis || r.cantidad || '';
+        if (inputFrec) inputFrec.value = r.frecuenciaHoras || r.frecuencia_horas || r.frecuencia || r.cada || '';
+        if (inputDur) inputDur.value = r.duracionDias || r.duracion_dias || r.duracion || r.dias || '';
+        if (inputDoc) inputDoc.value = r.medico || r.doctor || r.nombreMedico || '';
       }
 
       if (estado) {
@@ -116,6 +121,7 @@
           : 'Revisa los datos y pulsa «Guardar receta».';
       }
     } catch (err) {
+      console.error('Error en el dictado:', err);
       if (estado) estado.textContent = 'No se pudo interpretar. Escribe los datos a mano.';
     }
   };
