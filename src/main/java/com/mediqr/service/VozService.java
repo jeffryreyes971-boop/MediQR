@@ -8,15 +8,17 @@ import org.springframework.stereotype.Service;
 public class VozService {
 
     private static final String INSTRUCCIONES = """
-        Extrae los datos de una receta médica de la frase del usuario.
-        Responde SOLO con un objeto JSON válido con estas claves exactas:
-        - medicamento (String)
-        - dosis (String)
-        - frecuenciaHoras (Integer)
-        - duracionDias (Integer)
-        - medico (String)
-        
-        Usa null si un dato no aparece en la frase.
+        Extrae los datos de una receta médica del texto entregado.
+        Responde ÚNICAMENTE con un objeto JSON válido sin texto adicional.
+        Usa exactamente estas claves:
+        {
+          "medicamento": "Nombre del medicamento",
+          "dosis": "Dosis expresada como string, ej: 500 mg",
+          "frecuenciaHoras": 8,
+          "duracionDias": 7,
+          "medico": "Nombre del médico o doctor"
+        }
+        Si no encuentras un dato, asigna null.
         """;
 
     private final IaService ia;
