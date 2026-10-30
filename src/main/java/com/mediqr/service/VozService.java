@@ -8,9 +8,8 @@ import org.springframework.stereotype.Service;
 public class VozService {
 
     private static final String INSTRUCCIONES = """
-        Extrae los datos de una receta médica de la frase entregada por el usuario.
-        Responde ÚNICAMENTE con un objeto JSON válido, sin texto explicativo adicional ni comillas invertidas.
-        Las claves del JSON deben ser exactamente:
+        Extrae los datos de una receta médica de la frase del usuario.
+        Responde SOLO con un objeto JSON válido con estas claves exactas:
         - medicamento (String)
         - dosis (String)
         - frecuenciaHoras (Integer)
@@ -30,16 +29,17 @@ public class VozService {
 
     public RecetaDto interpretar(String texto) {
         try {
-            String respuestaIa = ia.preguntar(INSTRUCCIONES, texto);
-            
-            // Limpieza robusta de etiquetas markdown o comillas invertidas
-            String jsonLimpio = respuestaIa.replaceAll("```json", "")
-                                           .replaceAll("```", "")
-                                           .trim();
+            String json = ia.preguntar(INSTRUCCIONES, texto)
+                            .replaceAll("```json", "")
+                            .replaceAll("```", "")
+                            .trim();
 
-            return mapper.readValue(jsonLimpio, RecetaDto.class);
+            if (json.isBlank() || json.equals("{}")) {
+                return new RecetaDto(null, null, null, null, null);
+            }
+
+            return mapper.readValue(json, RecetaDto.class);
         } catch (Exception e) {
-            // Si la IA no responde un JSON perfecto o falla, devuelve un objeto seguro en lugar de lanzar excepción
             return new RecetaDto(null, null, null, null, null);
         }
     }
