@@ -70,13 +70,11 @@
     if (estado) estado.textContent = 'Interpretando «' + textoFinal + '» con IA...';
 
     try {
-      // 1. Intenta leer meta tags de CSRF
       var csrfMeta = document.querySelector('meta[name="_csrf"]');
       var headerMeta = document.querySelector('meta[name="_csrf_header"]');
 
       var headers = { 'Content-Type': 'application/json' };
 
-      // 2. Si existen metatags se envian, sino busca el token dentro del formulario de Thymeleaf
       if (csrfMeta && headerMeta && csrfMeta.content) {
         headers[headerMeta.content] = csrfMeta.content;
       } else {
@@ -96,14 +94,20 @@
       if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
 
-      var receta = datos.receta || datos;
+      var receta = datos.receta || datos.datos || datos;
 
       if (receta) {
-        if (receta.medicamento) document.getElementById('medicamento').value = receta.medicamento;
-        if (receta.dosis) document.getElementById('dosis').value = receta.dosis;
-        if (receta.frecuenciaHoras) document.getElementById('frecuenciaHoras').value = receta.frecuenciaHoras;
-        if (receta.duracionDias) document.getElementById('duracionDias').value = receta.duracionDias;
-        if (receta.medico) document.getElementById('medico').value = receta.medico;
+        var med = receta.medicamento || receta.nombre || receta.nombreMedicamento;
+        var dos = receta.dosis || receta.cantidad;
+        var frec = receta.frecuenciaHoras || receta.frecuencia_horas || receta.frecuencia;
+        var dur = receta.duracionDias || receta.duracion_dias || receta.duracion;
+        var medi = receta.medico || receta.doctor || receta.nombreMedico;
+
+        if (med) document.getElementById('medicamento').value = med;
+        if (dos) document.getElementById('dosis').value = dos;
+        if (frec) document.getElementById('frecuenciaHoras').value = frec;
+        if (dur) document.getElementById('duracionDias').value = dur;
+        if (medi) document.getElementById('medico').value = medi;
       }
 
       if (estado) {
