@@ -22,11 +22,15 @@ public class IaService {
 
         String url = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
+        // Configuración para forzar respuesta JSON pura desde la API de Gemini
         Map<String, Object> cuerpo = Map.of(
             "contents", List.of(
                 Map.of("role", "user", "parts", List.of(
                     Map.of("text", instrucciones + "\n\nTexto a procesar:\n" + datos)
                 ))
+            ),
+            "generationConfig", Map.of(
+                "response_mime_type", "application/json"
             )
         );
 
