@@ -1,48 +1,53 @@
 package com.mediqr.service;
 
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class IaService {
 
-    private final RestClient client = RestClient.create("https://api.anthropic.com");
+    private final RestClient client = RestClient.create("https://generativelanguage.googleapis.com");
 
-    @Value("${anthropic.api.key:}")
+    @Value("${GEMINI_API_KEY:}")
     private String apiKey;
 
-    @Value("${anthropic.model}")
-    private String modelo;
-
-    /** Envía instrucciones + datos a la IA y devuelve el texto de la respuesta. */
     public String preguntar(String instrucciones, String datos) {
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Falta configurar la clave ANTHROPIC_API_KEY");
+            return "{}";
         }
+
+        String url = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+
         Map<String, Object> cuerpo = Map.of(
-            "model", modelo,
-            "max_tokens", 1000,
-            "system", instrucciones,
-            "messages", List.of(Map.of("role", "user", "content", datos))
+            "contents", List.of(
+                Map.of("role", "user", "parts", List.of(
+                    Map.of("text", instrucciones + "\n\nTexto a procesar:\n" + datos)
+                ))
+            )
         );
+
         try {
-            Map<?, ?> resp = client.post().uri("/v1/messages")
-                .header("x-api-key", apiKey)
-                .header("anthropic-version", "2023-06-01")
+            Map<?, ?> resp = client.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(cuerpo)
                 .retrieve()
                 .body(Map.class);
 
-            List<?> contenido = (List<?>) resp.get("content");
-            return (String) ((Map<?, ?>) contenido.get(0)).get("text");
+            List<?> candidates = (List<?>) resp.get("candidates");
+            if (candidates == null || candidates.isEmpty()) return "{}";
+
+            Map<?, ?> candidate = (Map<?, ?>) candidates.get(0);
+            Map<?, ?> content = (Map<?, ?>) candidate.get("content");
+            List<?> parts = (List<?>) content.get("parts");
+            Map<?, ?> part = (Map<?, ?>) parts.get(0);
+
+            return (String) part.get("text");
         } catch (Exception e) {
-            // Si falla internet o la API, la aplicación NO debe caerse
-            throw new IllegalStateException("No se pudo consultar a la IA: " + e.getMessage());
+            return "{}";
         }
     }
 }
