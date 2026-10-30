@@ -15,12 +15,12 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filtros(HttpSecurity http) throws Exception {
         http
-            // Se agrega /api/** para evitar bloqueos 403 en peticiones asincronas de voz/IA
             .csrf(csrf -> csrf.ignoringRequestMatchers("/emergencia/**", "/consulta/**", "/api/**"))
             .authorizeHttpRequests(a -> a
                 .requestMatchers(
                     "/", "/login", "/registro", "/error",
                     "/css/**", "/js/**", "/img/**", "/favicon.ico",
+                    "/webjars/**",
                     "/emergencia/**", "/consulta/**",
                     "/perfiles/*/qr/**"
                 ).permitAll()
