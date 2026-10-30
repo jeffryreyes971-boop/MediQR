@@ -6,6 +6,8 @@ import com.mediqr.repository.*;
 import com.mediqr.service.AuditoriaService;
 import com.mediqr.service.TokenQrService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Optional;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,34 +41,57 @@ public class PublicoController {
         this.auditoria = auditoria;
     }
 
-    /** QR de emergencia: SOLO lo vital. */
-  @GetMapping("/emergencia/{codigo}")
-@org.springframework.web.bind.annotation.ResponseBody
-public String emergencia(@PathVariable String codigo) {
-    return "OK: La ruta de emergencia es publica y el codigo recibido es: " + codigo;
-}
+    /** QR de emergencia: PÚBLICO y entrega los datos vitales directamente. */
+    @GetMapping("/emergencia/{codigo}")
+    public String emergencia(@PathVariable String codigo, HttpServletRequest req, Model model) {
+        Optional<Perfil> op = perfiles.findByCodigoEmergencia(codigo);
+        if (op.isEmpty()) {
+            return "qr/invalido";
+        }
+        Perfil p = op.get();
 
-        auditoria.registrar(p, "EMERGENCIA", req);
+        try {
+            auditoria.registrar(p, "EMERGENCIA", req);
+        } catch (Exception e) {
+            // Previene que caiga la vista si falla el registro de auditoría
+        }
+
+        // Cálculo de edad
+        if (p.getFechaNacimiento() != null) {
+            int edad = Period.between(p.getFechaNacimiento(), LocalDate.now()).getYears();
+            model.addAttribute("edad", edad);
+        }
+
         model.addAttribute("perfil", p);
         model.addAttribute("alergias", alergias.findByPerfilId(p.getId()));
         model.addAttribute("criticos", recetas.findByPerfilIdAndActivaTrueAndCriticoTrue(p.getId()));
+        model.addAttribute("enfermedades", enfermedades.findByPerfilId(p.getId()));
         model.addAttribute("contactos", contactos.findByPerfilId(p.getId()));
+        
         return "qr/emergencia";
     }
 
-    /** QR de consulta: resumen completo, válido una sola vez y por pocos minutos. */
+    /** QR de consulta: resumen completo de un solo uso para el médico. */
     @GetMapping("/consulta/{codigo}")
     public String consulta(@PathVariable String codigo, HttpServletRequest req, Model model) {
         Optional<TokenQr> token = tokenService.consumir(codigo);
-        if (token.isEmpty()) return "qr/invalido";      // usado, vencido o inexistente
+        if (token.isEmpty()) {
+            return "qr/invalido";
+        }
         Perfil p = token.get().getPerfil();
 
-        auditoria.registrar(p, "CONSULTA", req);
+        try {
+            auditoria.registrar(p, "CONSULTA", req);
+        } catch (Exception e) {
+            // Previene que caiga la vista si falla el registro de auditoría
+        }
+
         model.addAttribute("perfil", p);
         model.addAttribute("alergias", alergias.findByPerfilId(p.getId()));
         model.addAttribute("recetas", recetas.findByPerfilIdAndActivaTrue(p.getId()));
         model.addAttribute("enfermedades", enfermedades.findByPerfilId(p.getId()));
         model.addAttribute("vacunas", vacunas.findByPerfilIdOrderByFechaAplicacionDesc(p.getId()));
+        
         return "qr/consulta-medico";
     }
 }
