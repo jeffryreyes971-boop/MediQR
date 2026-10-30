@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,17 +23,17 @@ public class IaService {
 
         String url = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
-        // Configuración para forzar respuesta JSON pura desde la API de Gemini
-        Map<String, Object> cuerpo = Map.of(
-            "contents", List.of(
-                Map.of("role", "user", "parts", List.of(
-                    Map.of("text", instrucciones + "\n\nTexto a procesar:\n" + datos)
-                ))
-            ),
-            "generationConfig", Map.of(
-                "response_mime_type", "application/json"
-            )
-        );
+        Map<String, Object> cuerpo = new HashMap<>();
+        cuerpo.put("contents", List.of(
+            Map.of("role", "user", "parts", List.of(
+                Map.of("text", instrucciones + "\n\nTexto a procesar:\n" + datos)
+            ))
+        ));
+
+        // Forzar formato JSON desde la API de Gemini
+        Map<String, Object> config = new HashMap<>();
+        config.put("response_mime_type", "application/json");
+        cuerpo.put("generationConfig", config);
 
         try {
             Map<?, ?> resp = client.post().uri(url)
@@ -40,6 +41,8 @@ public class IaService {
                 .body(cuerpo)
                 .retrieve()
                 .body(Map.class);
+
+            if (resp == null) return "{}";
 
             List<?> candidates = (List<?>) resp.get("candidates");
             if (candidates == null || candidates.isEmpty()) return "{}";
