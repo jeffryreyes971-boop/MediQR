@@ -94,30 +94,27 @@
       if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
 
-      console.log('Respuesta recibida del servidor:', datos);
-
       var r = datos.receta || datos.datos || datos;
+      console.log('--- OBJETO RECETA RECIBIDO ---', JSON.stringify(r));
 
       if (r) {
-        var med = r.medicamento || r.nombre || r.nombreMedicamento || '';
-        var dos = r.dosis || r.cantidad || '';
-        var frec = r.frecuenciaHoras !== undefined ? r.frecuenciaHoras : (r.frecuencia_horas !== undefined ? r.frecuencia_horas : r.frecuencia);
-        var dur = r.duracionDias !== undefined ? r.duracionDias : (r.duracion_dias !== undefined ? r.duracion_dias : r.duracion);
-        var medi = r.medico || r.doctor || r.nombreMedico || '';
+        var med = r.medicamento || r.nombre || r.nombreMedicamento || r.med;
+        var dos = r.dosis || r.cantidad || r.dosisMedicamento;
+        var frec = r.frecuenciaHoras ?? r.frecuencia_horas ?? r.frecuencia ?? r.cadaHoras ?? r.cada;
+        var dur = r.duracionDias ?? r.duracion_dias ?? r.duracion ?? r.porDias ?? r.dias;
+        var medi = r.medico || r.doctor || r.nombreMedico || r.doc;
 
-        function setValor(id, val) {
-          var el = document.getElementById(id);
-          if (el && val !== undefined && val !== null && val !== '') {
-            el.value = String(val);
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        }
+        var elMed = document.getElementById('medicamento');
+        var elDos = document.getElementById('dosis');
+        var elFrec = document.getElementById('frecuenciaHoras');
+        var elDur = document.getElementById('duracionDias');
+        var elMedi = document.getElementById('medico');
 
-        setValor('medicamento', med);
-        setValor('dosis', dos);
-        setValor('frecuenciaHoras', frec);
-        setValor('duracionDias', dur);
-        setValor('medico', medi);
+        if (elMed && med) elMed.value = String(med);
+        if (elDos && dos) elDos.value = String(dos);
+        if (elFrec && frec !== undefined && frec !== null) elFrec.value = String(frec);
+        if (elDur && dur !== undefined && dur !== null) elDur.value = String(dur);
+        if (elMedi && medi) elMedi.value = String(medi);
       }
 
       if (estado) {
