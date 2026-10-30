@@ -94,25 +94,30 @@
       if (!resp.ok) throw new Error('Error HTTP ' + resp.status);
       var datos = await resp.json();
 
-      // Muestra en la consola de Developer Tools el JSON exacto retornado
       console.log('Respuesta recibida del servidor:', datos);
 
-      // Extrae la receta sin importar si viene en datos.receta, datos.datos o directamente en datos
       var r = datos.receta || datos.datos || datos;
 
       if (r) {
-        // Asignación con búsqueda amplia de propiedades
-        var inputMed = document.getElementById('medicamento');
-        var inputDos = document.getElementById('dosis');
-        var inputFrec = document.getElementById('frecuenciaHoras');
-        var inputDur = document.getElementById('duracionDias');
-        var inputDoc = document.getElementById('medico');
+        var med = r.medicamento || r.nombre || r.nombreMedicamento || '';
+        var dos = r.dosis || r.cantidad || '';
+        var frec = r.frecuenciaHoras !== undefined ? r.frecuenciaHoras : (r.frecuencia_horas !== undefined ? r.frecuencia_horas : r.frecuencia);
+        var dur = r.duracionDias !== undefined ? r.duracionDias : (r.duracion_dias !== undefined ? r.duracion_dias : r.duracion);
+        var medi = r.medico || r.doctor || r.nombreMedico || '';
 
-        if (inputMed) inputMed.value = r.medicamento || r.nombre || r.nombreMedicamento || '';
-        if (inputDos) inputDos.value = r.dosis || r.cantidad || '';
-        if (inputFrec) inputFrec.value = r.frecuenciaHoras || r.frecuencia_horas || r.frecuencia || r.cada || '';
-        if (inputDur) inputDur.value = r.duracionDias || r.duracion_dias || r.duracion || r.dias || '';
-        if (inputDoc) inputDoc.value = r.medico || r.doctor || r.nombreMedico || '';
+        function setValor(id, val) {
+          var el = document.getElementById(id);
+          if (el && val !== undefined && val !== null && val !== '') {
+            el.value = String(val);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+
+        setValor('medicamento', med);
+        setValor('dosis', dos);
+        setValor('frecuenciaHoras', frec);
+        setValor('duracionDias', dur);
+        setValor('medico', medi);
       }
 
       if (estado) {
