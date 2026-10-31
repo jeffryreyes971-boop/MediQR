@@ -1,6 +1,6 @@
 package com.mediqr.service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mediqr.dto.RecetaDto;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ public class VozService {
         Eres un asistente médico experto en extraer datos de recetas dictadas por voz.
         Analiza el texto ingresado y extrae la información requerida.
 
-        Devuelve ÚNICAMENTE un objeto JSON sin formato markdown con los siguientes atributos:
+        Devuelve ÚNICAMENTE un objeto JSON estricto sin formato markdown con los siguientes atributos:
         - "medicamento": (String) El nombre del medicamento (ej: "ranitidina", "amoxicilina").
         - "dosis": (String) Cantidad y unidad (ej: "500 mg", "10 ml").
         - "frecuenciaHoras": (Integer) Solo el número entero de horas entre tomas (ej: 8).
@@ -27,9 +27,9 @@ public class VozService {
         - "medico": (String) Nombre del médico (ej: "Dr. García").
 
         REGLAS ESTRICTAS:
-        1. Responde SOLAMENTE con el JSON.
+        1. Responde SOLAMENTE con el objeto JSON.
         2. No incluyas bloques ```json ni texto adicional.
-        3. Si un dato no aparece en el texto, asígnale null.
+        3. Si un dato no aparece en el texto, asignale null.
         """;
 
     private final IaService ia;
@@ -37,9 +37,7 @@ public class VozService {
 
     public VozService(IaService ia, ObjectMapper mapper) {
         this.ia = ia;
-        this.mapper = mapper.copy()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        this.mapper = mapper;
     }
 
     public RecetaDto interpretar(String texto) {
@@ -47,21 +45,27 @@ public class VozService {
             String respuestaRaw = ia.preguntar(INSTRUCCIONES, texto);
             log.info("Respuesta cruda de IA: {}", respuestaRaw);
 
-            if (respuestaRaw == null || respuestaRaw.isBlank()) {
+            if (respuestaRaw == null || respuestaRaw.isBlank() || respuestaRaw.trim().equals("{}")) {
                 return new RecetaDto(null, null, null, null, null);
             }
 
-            String json = extraerJson(respuestaRaw);
-            log.info("JSON extraído: {}", json);
+            String jsonStr = extraerJson(respuestaRaw);
+            log.info("JSON extraído para procesar: {}", jsonStr);
 
-            if (json.isBlank() || json.equals("{}")) {
-                return new RecetaDto(null, null, null, null, null);
-            }
+            JsonNode root = mapper.readTree(jsonStr);
 
-            return mapper.readValue(json, RecetaDto.class);
+            String medicamento = obtenerTexto(root, "medicamento", "nombre", "nombreMedicamento");
+            String dosis = obtenerTexto(root, "dosis", "cantidad");
+            Integer frecuenciaHoras = obtenerEntero(root, "frecuenciaHoras", "frecuencia_horas", "frecuencia");
+            Integer duracionDias = obtenerEntero(root, "duracionDias", "duracion_dias", "duracion");
+            String medico = obtenerTexto(root, "medico", "doctor", "nombreMedico");
+
+            RecetaDto resultado = new RecetaDto(medicamento, dosis, frecuenciaHoras, duracionDias, medico);
+            log.info("RecetaDto construido exitosamente: {}", resultado);
+            return resultado;
 
         } catch (Exception e) {
-            log.error("Fallo al interpretar la receta: {}", e.getMessage());
+            log.error("Fallo al interpretar la receta con IA: {}", e.getMessage(), e);
             return new RecetaDto(null, null, null, null, null);
         }
     }
@@ -73,5 +77,37 @@ public class VozService {
             return matcher.group().trim();
         }
         return texto.replaceAll("```json", "").replaceAll("```", "").trim();
+    }
+
+    private String obtenerTexto(JsonNode root, String... alias) {
+        for (String key : alias) {
+            if (root.hasNonNull(key)) {
+                String val = root.get(key).asText().trim();
+                if (!val.equalsIgnoreCase("null") && !val.isBlank()) {
+                    return val;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Integer obtenerEntero(JsonNode root, String... alias) {
+        for (String key : alias) {
+            if (root.hasNonNull(key)) {
+                JsonNode node = root.get(key);
+                if (node.isInt() || node.isNumber()) {
+                    return node.asInt();
+                }
+                if (node.isTextual()) {
+                    try {
+                        String limpio = node.asText().replaceAll("[^0-9]", "");
+                        if (!limpio.isBlank()) {
+                            return Integer.parseInt(limpio);
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        }
+        return null;
     }
 }
