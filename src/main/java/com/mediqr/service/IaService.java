@@ -26,7 +26,7 @@ public class IaService {
         }
 
         // Endpoint corregido para Gemini v1beta
-        String url = "/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+      String url = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
         cuerpo.put("contents", List.of(
