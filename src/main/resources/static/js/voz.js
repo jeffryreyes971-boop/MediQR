@@ -110,6 +110,7 @@
         var elDur = document.getElementById('duracionDias');
         var elMedi = document.getElementById('medico');
 
+        // ASIGNACIÓN DE VALORES A LOS INPUTS
         if (elMed && med) elMed.value = String(med);
         if (elDos && dos) elDos.value = String(dos);
         if (elFrec && frec !== undefined && frec !== null) elFrec.value = String(frec);
