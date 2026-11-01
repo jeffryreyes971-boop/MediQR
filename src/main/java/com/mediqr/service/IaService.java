@@ -15,19 +15,20 @@ import java.util.Map;
 public class IaService {
 
     private static final Logger log = LoggerFactory.getLogger(IaService.class);
-    private final RestClient client = RestClient.create("https://generativelanguage.googleapis.com");
+    // Sin URL base en el builder para evitar problemas de resolución de rutas
+    private final RestClient client = RestClient.create();
 
     @Value("${GEMINI_API_KEY:}")
     private String apiKey;
 
     public String preguntar(String instrucciones, String datos) {
         if (apiKey == null || apiKey.isBlank()) {
-            log.error("GEMINI_API_KEY no está presente en la configuración.");
+            log.error("GEMINI_API_KEY no está configurada.");
             return "No se ha configurado la clave de API de Gemini.";
         }
 
-        // Endpoint usando v1 directo y el nombre exacto retornado por el API: gemini-2.5-flash
-        String url = "/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+        // URL absoluta apuntando a v1beta y el modelo gemini-2.5-flash devuelto por tu curl
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
         cuerpo.put("contents", List.of(
@@ -37,9 +38,10 @@ public class IaService {
         ));
 
         try {
-            log.info("Enviando petición a Gemini (gemini-2.5-flash)...");
+            log.info("Llamando a Gemini con URL absoluta...");
 
-            Map<?, ?> resp = client.post().uri(url)
+            Map<?, ?> resp = client.post()
+                .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(cuerpo)
                 .retrieve()
@@ -58,14 +60,14 @@ public class IaService {
             Map<?, ?> part = (Map<?, ?>) parts.get(0);
 
             String texto = (String) part.get("text");
-            log.info("Resumen generado con éxito.");
+            log.info("Resumen generado exitosamente.");
             return texto;
 
         } catch (HttpClientErrorException e) {
-            log.error("Error HTTP al llamar a Gemini API (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Error HTTP al llamar a Gemini (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
             return "Error al comunicar con la IA (" + e.getStatusCode() + " " + e.getStatusText() + "). Revisa los logs.";
         } catch (Exception e) {
-            log.error("Excepción al consultar Gemini API: {}", e.getMessage(), e);
+            log.error("Excepción general al consultar Gemini: {}", e.getMessage(), e);
             return "Error al generar el resumen médico. Intenta de nuevo más tarde.";
         }
     }
