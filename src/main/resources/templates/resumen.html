@@ -12,7 +12,10 @@
       <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
     </div>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
-    <div class="mq-resumen" th:if="${resumen}" th:text="${resumen}">Texto del resumen...</div>
+    
+    <!-- Agregado style="white-space: pre-line;" para respetar saltos de linea y viñetas del resumen -->
+    <div class="mq-resumen" th:if="${resumen}" th:text="${resumen}" style="white-space: pre-line;">Texto del resumen...</div>
+    
     <p class="small text-muted mt-3 mb-0"><i class="bi bi-robot"></i> Resumen generado por IA. No sustituye al criterio médico; verifica con los documentos originales.</p>
   </div></div>
 </main>
