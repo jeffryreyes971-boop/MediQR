@@ -26,8 +26,8 @@ public class IaService {
             return "No se ha configurado la clave de API de Gemini.";
         }
 
-        // Endpoint recomendado v1beta con gemini-1.5-flash
-        String url = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+        // Cambio a gemini-2.5-flash (o gemini-1.5-flash-latest)
+        String url = "/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
         cuerpo.put("contents", List.of(
@@ -59,7 +59,7 @@ public class IaService {
 
         } catch (HttpClientErrorException e) {
             log.error("Error HTTP al llamar a Gemini API (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
-            return "Error al comunicar con la IA (" + e.getStatusCode() + "). Revisa los logs.";
+            return "Error al comunicar con la IA (" + e.getStatusCode() + " " + e.getStatusText() + "). Revisa los logs.";
         } catch (Exception e) {
             log.error("Excepción al consultar Gemini API: {}", e.getMessage(), e);
             return "Error al generar el resumen médico. Intenta de nuevo más tarde.";
