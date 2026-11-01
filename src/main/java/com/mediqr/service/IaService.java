@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.HttpClientErrorException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,23 +22,21 @@ public class IaService {
 
     public String preguntar(String instrucciones, String datos) {
         if (apiKey == null || apiKey.isBlank()) {
-            log.error("GEMINI_API_KEY no está presente en el entorno.");
-            return "No se ha configurado la API Key de Gemini.";
+            log.error("GEMINI_API_KEY no está configurada.");
+            return "No se ha configurado la clave de API de Gemini.";
         }
 
-        // Endpoint usando gemini-1.5-flash
+        // Endpoint recomendado v1beta con gemini-1.5-flash
         String url = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
         cuerpo.put("contents", List.of(
             Map.of("role", "user", "parts", List.of(
-                Map.of("text", instrucciones + "\n\nDATOS DEL PACIENTE:\n" + datos)
+                Map.of("text", instrucciones + "\n\nDATOS CLINICOS DEL PACIENTE:\n" + datos)
             ))
         ));
 
         try {
-            log.info("Generando resumen médico con Gemini para los datos recibidos...");
-            
             Map<?, ?> resp = client.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(cuerpo)
@@ -56,13 +55,14 @@ public class IaService {
             List<?> parts = (List<?>) content.get("parts");
             Map<?, ?> part = (Map<?, ?>) parts.get(0);
 
-            String texto = (String) part.get("text");
-            log.info("Resumen generado exitosamente.");
-            return texto;
+            return (String) part.get("text");
 
+        } catch (HttpClientErrorException e) {
+            log.error("Error HTTP al llamar a Gemini API (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return "Error al comunicar con la IA (" + e.getStatusCode() + "). Revisa los logs.";
         } catch (Exception e) {
-            log.error("Error al consultar Gemini API: {}", e.getMessage(), e);
-            return "Error al generar el resumen médico. Intente de nuevo más tarde.";
+            log.error("Excepción al consultar Gemini API: {}", e.getMessage(), e);
+            return "Error al generar el resumen médico. Intenta de nuevo más tarde.";
         }
     }
 }
