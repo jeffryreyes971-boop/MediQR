@@ -14,16 +14,6 @@
     <ul class="mb-0"><li th:each="a : ${alertas}" th:text="${a}"></li></ul>
   </div>
 
-  <!-- Dictado por voz -->
-  <div class="mq-voz card mq-card mb-3"><div class="card-body d-flex align-items-center gap-3">
-    <button type="button" id="btnVoz" class="btn btn-outline-primary rounded-pill px-4" th:data-perfil="${perfil.id}">
-      <i class="bi bi-mic-fill"></i> Dictar receta
-    </button>
-    <div>
-      <div id="estadoVoz" class="small text-muted">Di algo como: «Ayer el Dr. García me recetó Amoxicilina de 500 mg cada 8 horas por 7 días».</div>
-    </div>
-  </div></div>
-
   <form th:action="@{/perfiles/{p}/recetas(p=${perfil.id})}" th:object="${receta}" method="post" class="card mq-card p-4 row g-3 mx-0">
     <div class="col-12"><label class="form-label">Medicamento</label>
       <input id="medicamento" class="form-control" th:field="*{medicamento}" th:errorclass="is-invalid">
