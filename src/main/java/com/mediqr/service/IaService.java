@@ -15,7 +15,6 @@ import java.util.Map;
 public class IaService {
 
     private static final Logger log = LoggerFactory.getLogger(IaService.class);
-    // Sin URL base en el builder para evitar problemas de resolución de rutas
     private final RestClient client = RestClient.create();
 
     @Value("${GEMINI_API_KEY:}")
@@ -27,8 +26,8 @@ public class IaService {
             return "No se ha configurado la clave de API de Gemini.";
         }
 
-        // URL absoluta apuntando a v1beta y el modelo gemini-2.5-flash devuelto por tu curl
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+        // Modelo solicitado por Google: gemini-3.8-flash
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
         cuerpo.put("contents", List.of(
@@ -38,7 +37,7 @@ public class IaService {
         ));
 
         try {
-            log.info("Llamando a Gemini con URL absoluta...");
+            log.info("Enviando petición a Gemini (gemini-3.8-flash)...");
 
             Map<?, ?> resp = client.post()
                 .uri(url)
@@ -64,7 +63,7 @@ public class IaService {
             return texto;
 
         } catch (HttpClientErrorException e) {
-            log.error("Error HTTP al llamar a Gemini (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Error HTTP al llamar a Gemini API (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
             return "Error al comunicar con la IA (" + e.getStatusCode() + " " + e.getStatusText() + "). Revisa los logs.";
         } catch (Exception e) {
             log.error("Excepción general al consultar Gemini: {}", e.getMessage(), e);
