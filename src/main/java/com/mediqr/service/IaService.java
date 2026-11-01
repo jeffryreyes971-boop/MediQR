@@ -7,9 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class IaService {
@@ -20,65 +18,58 @@ public class IaService {
     @Value("${GEMINI_API_KEY:}")
     private String apiKey;
 
+    // Estrategia DTO interna para mapeo exacto y seguro de JSON de Gemini
+    public record Part(String text) {}
+    public record Content(List<Part> parts, String role) {}
+    public record Candidate(Content content) {}
+    public record GeminiResponse(List<Candidate> candidates) {}
+
+    public record TextPart(String text) {}
+    public record ContentRequest(String role, List<TextPart> parts) {}
+    public record GeminiRequest(List<ContentRequest> contents) {}
+
     public String preguntar(String instrucciones, String datos) {
         if (apiKey == null || apiKey.isBlank()) {
-            log.error("GEMINI_API_KEY no está presente en las variables de entorno.");
-            return "No se ha configurado la clave de API de Gemini en el servidor.";
+            log.error("GEMINI_API_KEY no está presente en el entorno de Render.");
+            return "No se ha configurado la clave de API de Gemini.";
         }
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=" + apiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=" + apiKey.trim();
 
-        Map<String, Object> cuerpo = new HashMap<>();
-        cuerpo.put("contents", List.of(
-            Map.of("role", "user", "parts", List.of(
-                Map.of("text", instrucciones + "\n\nDATOS CLINICOS DEL PACIENTE:\n" + datos)
+        GeminiRequest payload = new GeminiRequest(List.of(
+            new ContentRequest("user", List.of(
+                new TextPart(instrucciones + "\n\nDATOS CLINICOS DEL PACIENTE:\n" + datos)
             ))
         ));
 
         try {
-            log.info("Solicitando resumen clínico a Gemini (gemini-3.8-flash)...");
+            log.info("Enviando petición a Gemini (gemini-3.8-flash)...");
 
-            Map<?, ?> resp = client.post()
+            GeminiResponse resp = client.post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(cuerpo)
+                .body(payload)
                 .retrieve()
-                .body(Map.class);
+                .body(GeminiResponse.class);
 
-            if (resp == null) {
-                log.warn("Respuesta nula recibida desde Gemini API.");
-                return "No se recibió respuesta del servicio de IA.";
+            if (resp != null && resp.candidates() != null && !resp.candidates().isEmpty()) {
+                Candidate firstCandidate = resp.candidates().get(0);
+                if (firstCandidate.content() != null && firstCandidate.content().parts() != null && !firstCandidate.content().parts().isEmpty()) {
+                    String texto = firstCandidate.content().parts().get(0).text();
+                    log.info("Resumen médico generado con éxito.");
+                    return texto;
+                }
             }
 
-            List<?> candidates = (List<?>) resp.get("candidates");
-            if (candidates == null || candidates.isEmpty()) {
-                log.warn("La respuesta de Gemini no contiene candidatos.");
-                return "No se pudo generar el resumen clínico con los datos actuales.";
-            }
-
-            Map<?, ?> candidate = (Map<?, ?>) candidates.get(0);
-            Map<?, ?> content = (Map<?, ?>) candidate.get("content");
-            if (content == null) {
-                return "Respuesta clínica incompleta.";
-            }
-
-            List<?> parts = (List<?>) content.get("parts");
-            if (parts == null || parts.isEmpty()) {
-                return "Respuesta vacía del modelo.";
-            }
-
-            Map<?, ?> part = (Map<?, ?>) parts.get(0);
-            String texto = (String) part.get("text");
-
-            log.info("Resumen clínico generado exitosamente.");
-            return texto;
+            log.warn("Respuesta recibida de Gemini pero sin estructura de texto utilizable.");
+            return "No se pudo extraer la información del resumen médico.";
 
         } catch (HttpClientErrorException e) {
-            log.error("Error HTTP ({}) al consultar Gemini: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            return "Error en comunicación con la IA (" + e.getStatusCode() + ").";
+            log.error("Error HTTP ({}) al consultar Gemini API: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return "Error al comunicar con la IA (" + e.getStatusCode() + " " + e.getStatusText() + "). Revisa los logs.";
         } catch (Exception e) {
-            log.error("Error procesando respuesta de Gemini: {}", e.getMessage(), e);
-            return "Error interno al procesar el resumen. Revisa los logs de Render.";
+            log.error("Excepción en IaService al procesar la solicitud: {}", e.getMessage(), e);
+            return "Error al generar el resumen médico. Intenta de nuevo más tarde.";
         }
     }
 }
