@@ -22,12 +22,12 @@ public class IaService {
 
     public String preguntar(String instrucciones, String datos) {
         if (apiKey == null || apiKey.isBlank()) {
-            log.error("GEMINI_API_KEY no está configurada.");
+            log.error("GEMINI_API_KEY no está presente en la configuración.");
             return "No se ha configurado la clave de API de Gemini.";
         }
 
-        // Cambio a gemini-2.5-flash (o gemini-1.5-flash-latest)
-        String url = "/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+        // Endpoint usando v1 directo y el nombre exacto retornado por el API: gemini-2.5-flash
+        String url = "/v1/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> cuerpo = new HashMap<>();
         cuerpo.put("contents", List.of(
@@ -37,6 +37,8 @@ public class IaService {
         ));
 
         try {
+            log.info("Enviando petición a Gemini (gemini-2.5-flash)...");
+
             Map<?, ?> resp = client.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(cuerpo)
@@ -55,7 +57,9 @@ public class IaService {
             List<?> parts = (List<?>) content.get("parts");
             Map<?, ?> part = (Map<?, ?>) parts.get(0);
 
-            return (String) part.get("text");
+            String texto = (String) part.get("text");
+            log.info("Resumen generado con éxito.");
+            return texto;
 
         } catch (HttpClientErrorException e) {
             log.error("Error HTTP al llamar a Gemini API (Status {}): {}", e.getStatusCode(), e.getResponseBodyAsString());
