@@ -4,6 +4,7 @@ import com.mediqr.model.Perfil;
 import com.mediqr.model.Usuario;
 import com.mediqr.repository.*;
 import com.mediqr.service.DocumentoService;
+import com.mediqr.service.IaService;
 import com.mediqr.service.PerfilService;
 import java.security.Principal;
 import java.util.UUID;
@@ -24,12 +25,14 @@ public class PerfilController {
     private final EnfermedadRepository enfermedades;
     private final DocumentoRepository documentos;
     private final DocumentoService documentoService;
+    private final IaService iaService;
 
     public PerfilController(PerfilService perfilService, PerfilRepository perfiles,
                             UsuarioRepository usuarios, AlergiaRepository alergias,
                             RecetaRepository recetas, VacunaRepository vacunas,
                             EnfermedadRepository enfermedades,
-                            DocumentoRepository documentos, DocumentoService documentoService) {
+                            DocumentoRepository documentos, DocumentoService documentoService,
+                            IaService iaService) {
         this.documentos = documentos;
         this.documentoService = documentoService;
         this.perfilService = perfilService;
@@ -39,6 +42,7 @@ public class PerfilController {
         this.recetas = recetas;
         this.vacunas = vacunas;
         this.enfermedades = enfermedades;
+        this.iaService = iaService;
     }
 
     /** Pantalla de inicio: todos los perfiles de la cuenta. */
@@ -144,7 +148,7 @@ public class PerfilController {
         return "redirect:/dashboard";
     }
 
-    /** Resumen del perfil con contadores. */
+    /** Resumen del perfil con contadores y manejo seguro de IA. */
     @GetMapping("/perfiles/{perfilId}")
     public String inicio(@PathVariable Long perfilId, Principal pr, Model model) {
         if (pr == null) {
@@ -156,6 +160,22 @@ public class PerfilController {
         model.addAttribute("recetas", recetas.findByPerfilIdAndActivaTrue(perfilId));
         model.addAttribute("vacunas", vacunas.findByPerfilIdOrderByFechaAplicacionDesc(perfilId));
         model.addAttribute("enfermedades", enfermedades.findByPerfilId(perfilId));
+
+        // Obtención controlada del resumen para evitar excepciones 429
+        try {
+            if (iaService != null) {
+                String resumen = iaService.generarResumenClinico(perfil);
+                model.addAttribute("resumenIa", resumen);
+            }
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                model.addAttribute("resumenIaError", 
+                    "Límite de solicitudes a la IA alcanzado por este minuto (15 RPM). Por favor espera unos segundos y recarga.");
+            } else {
+                model.addAttribute("resumenIaError", "No se pudo generar el resumen clínico en este momento.");
+            }
+        }
+
         return "perfiles/inicio";
     }
 }
