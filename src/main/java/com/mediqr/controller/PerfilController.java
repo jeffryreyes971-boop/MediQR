@@ -55,22 +55,27 @@ public class PerfilController {
         return "perfiles/nuevo";
     }
 
-    @PostMapping("/perfiles")
-    public String crear(@ModelAttribute("perfil") Perfil form, Principal pr, RedirectAttributes flash) {
-        if (form.getNombre() == null || form.getNombre().isBlank()) {
-            flash.addFlashAttribute("error", "El nombre del perfil es obligatorio.");
-            return "redirect:/perfiles/nuevo";
-        }
-        Usuario u = usuarios.findByCorreo(pr.getName()).orElseThrow();
-        Perfil p = new Perfil();                       // se crea uno nuevo: no se confía en el formulario
-        p.setUsuario(u);
-        p.setNombre(form.getNombre().trim());
-        p.setParentesco(form.getParentesco());
-        p.setFechaNacimiento(form.getFechaNacimiento());
-        String sangre = form.getTipoSangre();
-        p.setTipoSangre(sangre == null || sangre.isBlank() ? null : sangre);
-        perfiles.save(p);
-        return "redirect:/perfiles/" + p.getId();
+   @PostMapping("/perfiles")
+   public String crear(@ModelAttribute("perfil") Perfil form, Principal pr, RedirectAttributes flash) {
+    if (form.getNombre() == null || form.getNombre().isBlank()) {
+        flash.addFlashAttribute("error", "El nombre del perfil es obligatorio.");
+        return "redirect:/perfiles/nuevo";
+    }
+      Usuario u = usuarios.findByCorreo(pr.getName()).orElseThrow();
+      Perfil p = new Perfil();
+      p.setUsuario(u);
+      p.setNombre(form.getNombre().trim());
+      p.setParentesco(form.getParentesco());
+      p.setFechaNacimiento(form.getFechaNacimiento());
+    
+    // Generar explicitamente el codigo de emergencia unico
+      p.setCodigoEmergencia(java.util.UUID.randomUUID().toString());
+
+      String sangre = form.getTipoSangre();
+      p.setTipoSangre(sangre == null || sangre.isBlank() ? null : sangre);
+    
+      perfiles.save(p);
+      return "redirect:/perfiles/" + p.getId();
     }
 
     /** Formulario para editar los datos básicos de un perfil. */
