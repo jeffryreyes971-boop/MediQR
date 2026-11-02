@@ -6,6 +6,7 @@ import com.mediqr.repository.*;
 import com.mediqr.service.DocumentoService;
 import com.mediqr.service.PerfilService;
 import java.security.Principal;
+import java.util.UUID;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,51 +44,68 @@ public class PerfilController {
     /** Pantalla de inicio: todos los perfiles de la cuenta. */
     @GetMapping("/dashboard")
     public String dashboard(Principal pr, Model model) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
         model.addAttribute("perfiles", perfiles.findByUsuarioCorreo(pr.getName()));
         return "dashboard";
     }
 
     @GetMapping("/perfiles/nuevo")
-    public String nuevo(Model model) {
+    public String nuevo(Principal pr, Model model) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
         Perfil p = new Perfil();
         p.setParentesco(Perfil.Parentesco.HIJO);
         model.addAttribute("perfil", p);
         return "perfiles/nuevo";
     }
 
-   @PostMapping("/perfiles")
-   public String crear(@ModelAttribute("perfil") Perfil form, Principal pr, RedirectAttributes flash) {
-    if (form.getNombre() == null || form.getNombre().isBlank()) {
-        flash.addFlashAttribute("error", "El nombre del perfil es obligatorio.");
-        return "redirect:/perfiles/nuevo";
-    }
-      Usuario u = usuarios.findByCorreo(pr.getName()).orElseThrow();
-      Perfil p = new Perfil();
-      p.setUsuario(u);
-      p.setNombre(form.getNombre().trim());
-      p.setParentesco(form.getParentesco());
-      p.setFechaNacimiento(form.getFechaNacimiento());
-    
-    // Generar explicitamente el codigo de emergencia unico
-      p.setCodigoEmergencia(java.util.UUID.randomUUID().toString());
+    @PostMapping("/perfiles")
+    public String crear(@ModelAttribute("perfil") Perfil form, Principal pr, RedirectAttributes flash) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
+        if (form.getNombre() == null || form.getNombre().isBlank()) {
+            flash.addFlashAttribute("error", "El nombre del perfil es obligatorio.");
+            return "redirect:/perfiles/nuevo";
+        }
+        
+        Usuario u = usuarios.findByCorreo(pr.getName()).orElseThrow();
+        Perfil p = new Perfil(); // Se crea un nuevo objeto por seguridad
+        p.setUsuario(u);
+        p.setNombre(form.getNombre().trim());
+        p.setParentesco(form.getParentesco() != null ? form.getParentesco() : Perfil.Parentesco.HIJO);
+        p.setFechaNacimiento(form.getFechaNacimiento());
+        
+        // Garantizamos que el código de emergencia se cree adecuadamente
+        p.setCodigoEmergencia(UUID.randomUUID().toString());
 
-      String sangre = form.getTipoSangre();
-      p.setTipoSangre(sangre == null || sangre.isBlank() ? null : sangre);
-    
-      perfiles.save(p);
-      return "redirect:/perfiles/" + p.getId();
+        String sangre = form.getTipoSangre();
+        p.setTipoSangre(sangre == null || sangre.isBlank() ? null : sangre);
+        
+        perfiles.save(p);
+        flash.addFlashAttribute("ok", "Perfil creado exitosamente.");
+        return "redirect:/perfiles/" + p.getId();
     }
 
     /** Formulario para editar los datos básicos de un perfil. */
     @GetMapping("/perfiles/{perfilId}/editar")
     public String editar(@PathVariable Long perfilId, Principal pr, Model model) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
         model.addAttribute("perfil", perfilService.obtenerSiEsDueno(perfilId, pr.getName()));
         return "perfiles/editar";
     }
 
     @PostMapping("/perfiles/{perfilId}/editar")
-    public String actualizar(@PathVariable Long perfilId, @ModelAttribute("form") Perfil form,
+    public String actualizar(@PathVariable Long perfilId, @ModelAttribute("perfil") Perfil form,
                              Principal pr, RedirectAttributes flash) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
         Perfil p = perfilService.obtenerSiEsDueno(perfilId, pr.getName());
         if (form.getNombre() == null || form.getNombre().isBlank()) {
             flash.addFlashAttribute("error", "El nombre no puede quedar vacío.");
@@ -97,6 +115,7 @@ public class PerfilController {
         p.setFechaNacimiento(form.getFechaNacimiento());
         String sangre = form.getTipoSangre();
         p.setTipoSangre(sangre == null || sangre.isBlank() ? null : sangre);
+        
         // El perfil del titular siempre sigue siendo TITULAR; los demás pueden cambiar de parentesco
         if (p.getParentesco() != Perfil.Parentesco.TITULAR
                 && form.getParentesco() != null
@@ -111,13 +130,16 @@ public class PerfilController {
     /** Elimina un perfil familiar y todo su historial. El perfil del titular no se puede borrar. */
     @PostMapping("/perfiles/{perfilId}/eliminar")
     public String eliminar(@PathVariable Long perfilId, Principal pr, RedirectAttributes flash) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
         Perfil p = perfilService.obtenerSiEsDueno(perfilId, pr.getName());
         if (p.getParentesco() == Perfil.Parentesco.TITULAR) {
             flash.addFlashAttribute("error", "El perfil principal de tu cuenta no se puede eliminar.");
             return "redirect:/dashboard";
         }
         documentos.findByPerfilIdOrderByCreadoEnDesc(perfilId).forEach(documentoService::borrarArchivo);
-        perfiles.delete(p);   // la base de datos borra en cascada alergias, recetas, vacunas, etc.
+        perfiles.delete(p); // La base de datos borra en cascada alergias, recetas, vacunas, etc.
         flash.addFlashAttribute("ok", "Perfil eliminado.");
         return "redirect:/dashboard";
     }
@@ -125,6 +147,9 @@ public class PerfilController {
     /** Resumen del perfil con contadores. */
     @GetMapping("/perfiles/{perfilId}")
     public String inicio(@PathVariable Long perfilId, Principal pr, Model model) {
+        if (pr == null) {
+            return "redirect:/login";
+        }
         Perfil perfil = perfilService.obtenerSiEsDueno(perfilId, pr.getName());
         model.addAttribute("perfil", perfil);
         model.addAttribute("alergias", alergias.findByPerfilId(perfilId));
