@@ -11,7 +11,8 @@ public class Perfil {
 
     public enum Parentesco { TITULAR, HIJO, ADULTO_MAYOR, OTRO }
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
@@ -37,6 +38,13 @@ public class Perfil {
 
     public Perfil() { }
 
+    @PrePersist
+    public void prePersist() {
+        if (this.codigoEmergencia == null || this.codigoEmergencia.isBlank()) {
+            this.codigoEmergencia = UUID.randomUUID().toString();
+        }
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -57,5 +65,4 @@ public class Perfil {
 
     public String getCodigoEmergencia() { return codigoEmergencia; }
     public void setCodigoEmergencia(String codigoEmergencia) { this.codigoEmergencia = codigoEmergencia; }
-
 }
