@@ -8,18 +8,24 @@
   --mq-lavanda: #786BFA;
 }
 
+/* ==========================================================================
+   Fondo general de la aplicación (Panel de Control)
+   ========================================================================== */
 body {
   background: linear-gradient(180deg, rgba(240, 242, 250, 0.35) 0%, rgba(200, 210, 235, 0.45) 100%),
-              url('../img/imagen4.jpg') no-repeat center center / cover fixed !important;
+              url('../imagen/imagen4.jpg') no-repeat center center / cover fixed !important;
   min-height: 100vh;
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Auth Pages */
+/* ==========================================================================
+   1. Pantalla de Autenticación (Login / Registro)
+   ========================================================================== */
+
 body.mq-auth {
   min-height: 100vh;
-  background: url('../img/fondo (2).jpg') no-repeat center center / cover !important;
+  background: url('../imagen/fondo.jpg') no-repeat center center / cover !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,12 +34,14 @@ body.mq-auth {
   padding: 30px 16px;
 }
 
+/* Ocultar cualquier círculo o figura previa */
 body.mq-auth::before,
 body.mq-auth::after {
   content: none !important;
   display: none !important;
 }
 
+/* Tarjeta flotante de Login */
 .mq-auth-card {
   position: relative;
   z-index: 1;
@@ -102,7 +110,10 @@ body.mq-auth::after {
   text-decoration: underline;
 }
 
-/* Dashboard & Navigation */
+/* ==========================================================================
+   2. Navegación y Encabezado Hero (Dashboard)
+   ========================================================================== */
+
 .mq-nav {
   background: linear-gradient(90deg, #26365F, #394D7C);
   box-shadow: 0 3px 15px rgba(38, 54, 95, 0.15);
@@ -118,16 +129,20 @@ body.mq-auth::after {
   color: var(--mq-claro);
 }
 
+/* Banner de Saludo con Imagen Médica de Fondo */
 .mq-hero {
   background: linear-gradient(135deg, rgba(38, 54, 95, 0.82), rgba(26, 36, 63, 0.88)),
-              url('../img/fondo (2).jpg') no-repeat center center / cover !important;
+              url('../imagen/fondo.jpg') no-repeat center center / cover !important;
   color: #ffffff;
   padding: 3rem 0 3.5rem;
   margin-bottom: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Profile Cards */
+/* ==========================================================================
+   3. Tarjetas de Perfil (Elevadas sobre el fondo)
+   ========================================================================== */
+
 .mq-card {
   border: 1px solid #E3E7F2;
   border-radius: 20px;
@@ -165,7 +180,10 @@ a.mq-card:hover,
   transform: translateY(-3px);
 }
 
-/* UI Components */
+/* ==========================================================================
+   4. Botones, Avatares y Componentes
+   ========================================================================== */
+
 .btn-mq {
   background: var(--mq-azul);
   color: #ffffff;
@@ -276,6 +294,7 @@ a.mq-card:hover,
   box-shadow: 0 4px 16px rgba(38, 54, 95, 0.12);
 }
 
+/* Voice dictation, Alerts & Timelines */
 #btnVoz.escuchando {
   background: var(--mq-rojo);
   color: #ffffff;
@@ -349,6 +368,10 @@ a.mq-card:hover,
   background: var(--mq-lavanda);
   box-shadow: 0 0 0 2px #DDE2F0;
 }
+
+/* ==========================================================================
+   5. Adaptabilidad Móvil e Impresión
+   ========================================================================== */
 
 @media (max-width: 576px) {
   .mq-hero { padding: 2rem 0; }
