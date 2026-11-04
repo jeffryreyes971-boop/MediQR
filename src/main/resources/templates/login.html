@@ -8,9 +8,9 @@
     
     <!-- Encabezado con Logo centrado -->
     <div class="text-center mb-4">
-       <div class="mq-logo mb-2">
-         <img th:src="@{/imagen/logo-mediqr.png}" alt="Logo MediQR">
-       </div>
+      <div class="mq-logo mb-2">
+        <img th:src="@{/imagen/logo-mediqr.png}" alt="Logo MediQR">
+      </div>
       <p class="text-muted small mb-0">Tus datos médicos, siempre a la mano</p>
     </div>
 
@@ -22,14 +22,14 @@
     <!-- Formulario de autenticación -->
     <form th:action="@{/login}" method="post">
       
-      <!-- Campo Correo (name="username" requerido por Spring Security) -->
+      <!-- Campo Correo (manteniendo name="correo" funcional) -->
       <div class="mb-3">
         <label class="form-label small fw-semibold">Correo electrónico</label>
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0">
             <i class="bi bi-envelope text-muted"></i>
           </span>
-         <input name="correo" type="email" class="form-control bg-light border-start-0" placeholder="tucorreo@ejemplo.com" required autofocus>
+          <input name="correo" type="email" class="form-control bg-light border-start-0" placeholder="tucorreo@ejemplo.com" required autofocus>
         </div>
       </div>
       
