@@ -22,14 +22,14 @@
     <!-- Formulario de autenticación -->
     <form th:action="@{/login}" method="post">
       
-      <!-- Campo Correo -->
+      <!-- Campo Correo (name="username" requerido por Spring Security) -->
       <div class="mb-3">
         <label class="form-label small fw-semibold">Correo electrónico</label>
         <div class="input-group">
           <span class="input-group-text bg-light border-end-0">
             <i class="bi bi-envelope text-muted"></i>
           </span>
-          <input name="correo" type="email" class="form-control bg-light border-start-0" placeholder="tucorreo@ejemplo.com" required autofocus>
+          <input name="username" type="email" class="form-control bg-light border-start-0" placeholder="tucorreo@ejemplo.com" required autofocus>
         </div>
       </div>
       
