@@ -8,20 +8,32 @@
   --mq-lavanda: #786BFA;
 }
 
+body {
+  background: linear-gradient(180deg, rgba(240, 242, 250, 0.35) 0%, rgba(200, 210, 235, 0.45) 100%),
+              url('../img/imagen4.jpg') no-repeat center center / cover fixed !important;
+  min-height: 100vh;
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
 
+/* Auth Pages */
 body.mq-auth {
   min-height: 100vh;
-  background: url('../img/fondo (2).jpg') no-repeat center center / cover;
+  background: url('../img/fondo (2).jpg') no-repeat center center / cover !important;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow-x: hidden;
-  margin: 0;
   padding: 30px 16px;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
-/* Tarjeta flotante de Login y Registro */
+
+body.mq-auth::before,
+body.mq-auth::after {
+  content: none !important;
+  display: none !important;
+}
+
 .mq-auth-card {
   position: relative;
   z-index: 1;
@@ -34,7 +46,6 @@ body.mq-auth {
   box-shadow: 0 18px 50px rgba(38, 54, 95, 0.18);
 }
 
-/* Logo de la aplicación */
 .mq-logo {
   margin: 0 auto 0.75rem auto;
   display: flex;
@@ -48,7 +59,6 @@ body.mq-auth {
   object-fit: contain;
 }
 
-/* Campos del formulario de inicio de sesión */
 .mq-auth-card .form-control {
   min-height: 48px;
   border: 1px solid #D7DDEF;
@@ -64,7 +74,6 @@ body.mq-auth {
   box-shadow: 0 0 0 4px rgba(120, 107, 250, 0.13);
 }
 
-/* Botón de acceso en autenticación */
 .mq-auth-card .btn-mq {
   width: 100%;
   min-height: 48px;
@@ -83,7 +92,6 @@ body.mq-auth {
   transform: translateY(-1px);
 }
 
-/* Enlaces dentro de la tarjeta de login */
 .mq-auth-card a {
   color: #6958E8;
   text-decoration: none;
@@ -94,8 +102,7 @@ body.mq-auth {
   text-decoration: underline;
 }
 
-/* Navegación y Encabezados*/
-
+/* Dashboard & Navigation */
 .mq-nav {
   background: linear-gradient(90deg, #26365F, #394D7C);
   box-shadow: 0 3px 15px rgba(38, 54, 95, 0.15);
@@ -112,26 +119,27 @@ body.mq-auth {
 }
 
 .mq-hero {
-  background: linear-gradient(120deg, #26365F 0%, #5365A0 100%);
+  background: linear-gradient(135deg, rgba(38, 54, 95, 0.82), rgba(26, 36, 63, 0.88)),
+              url('../img/fondo (2).jpg') no-repeat center center / cover !important;
   color: #ffffff;
-  padding: 2.5rem 0 3.5rem;
-  margin-bottom: -1.5rem;
+  padding: 3rem 0 3.5rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Tarjetas */
-
+/* Profile Cards */
 .mq-card {
   border: 1px solid #E3E7F2;
   border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 6px 22px rgba(38, 54, 95, 0.08);
+  background: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(38, 54, 95, 0.12) !important;
   transition: transform .2s ease, box-shadow .2s ease;
 }
 
 a.mq-card:hover,
 .mq-card:hover {
-  box-shadow: 0 12px 30px rgba(38, 54, 95, 0.14);
-  transform: translateY(-3px);
+  box-shadow: 0 16px 35px rgba(38, 54, 95, 0.18) !important;
+  transform: translateY(-4px);
 }
 
 .mq-card-add {
@@ -141,21 +149,23 @@ a.mq-card:hover,
   justify-content: center;
   gap: .5rem;
   min-height: 220px;
-  border: 2px dashed #C9D0E5;
+  border: 2px dashed #B8C2E0;
   border-radius: 20px;
   color: var(--mq-azul);
-  background: #F9FAFE;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
   transition: all .2s ease;
+  box-shadow: 0 8px 25px rgba(38, 54, 95, 0.08);
 }
 
 .mq-card-add:hover {
-  background: #EEF0FA;
+  background: #ffffff;
   border-color: var(--mq-lavanda);
   color: var(--mq-lavanda);
+  transform: translateY(-3px);
 }
 
-/*Botones y Controles */
-
+/* UI Components */
 .btn-mq {
   background: var(--mq-azul);
   color: #ffffff;
@@ -187,8 +197,6 @@ a.mq-card:hover,
   border-color: var(--mq-lavanda);
   box-shadow: 0 0 0 .2rem rgba(120, 107, 250, 0.15);
 }
-
-/* Avatares*/
 
 .mq-avatar {
   width: 52px;
@@ -259,8 +267,6 @@ a.mq-card:hover,
   color: #6B7A88;
 }
 
-/* Códigos QR */
-
 .mq-qr {
   width: 240px;
   height: 240px;
@@ -270,7 +276,6 @@ a.mq-card:hover,
   box-shadow: 0 4px 16px rgba(38, 54, 95, 0.12);
 }
 
-/* Dictado por voz */
 #btnVoz.escuchando {
   background: var(--mq-rojo);
   color: #ffffff;
@@ -279,21 +284,12 @@ a.mq-card:hover,
 }
 
 @keyframes pulso {
-  0% {
-    box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 14px rgba(198, 40, 40, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(198, 40, 40, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.5); }
+  70% { box-shadow: 0 0 0 14px rgba(198, 40, 40, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0); }
 }
 
-/* Pantalla de emergencia */
-.mq-emergencia {
-  background: #FFF3F3;
-}
+.mq-emergencia { background: #FFF3F3; }
 
 .mq-alerta-banner {
   background: var(--mq-rojo);
@@ -321,7 +317,6 @@ a.mq-card:hover,
   color: #6B7A88;
 }
 
-/* Resumen con IA */
 .mq-resumen {
   white-space: pre-wrap;
   line-height: 1.6;
@@ -331,7 +326,6 @@ a.mq-card:hover,
   padding: 1.2rem;
 }
 
-/* Línea de tiempo de accesos */
 .mq-timeline {
   list-style: none;
   margin: 1rem 0 0;
@@ -356,47 +350,16 @@ a.mq-card:hover,
   box-shadow: 0 0 0 2px #DDE2F0;
 }
 
-/* Adaptabilidad a Dispositivos Móviles */
-
 @media (max-width: 576px) {
-  .mq-hero {
-    padding: 1.5rem 0 2.5rem;
-  }
-
-  .mq-auth-card {
-    padding: 1.5rem;
-    border-radius: 18px;
-  }
-
-  .mq-logo img {
-    max-height: 110px;
-  }
-
-  .mq-qr {
-    width: 200px;
-    height: 200px;
-  }
-
-  .mq-tabs {
-    overflow-x: auto;
-  }
+  .mq-hero { padding: 2rem 0; }
+  .mq-auth-card { padding: 1.5rem; border-radius: 18px; }
+  .mq-logo img { max-height: 110px; }
+  .mq-qr { width: 200px; height: 200px; }
+  .mq-tabs { overflow-x: auto; }
 }
 
 @media print {
-  .mq-nav,
-  .mq-tabs,
-  .btn,
-  .alert-warning,
-  form {
-    display: none !important;
-  }
-
-  body {
-    background: #ffffff;
-  }
-
-  .mq-card {
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
+  .mq-nav, .mq-tabs, .btn, .alert-warning, form { display: none !important; }
+  body { background: #ffffff !important; }
+  .mq-card { box-shadow: none !important; border: 1px solid #ccc; }
 }
